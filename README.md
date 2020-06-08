@@ -1,6 +1,6 @@
-caribou
+CARIBOU
 =====
 
-"Fork caribou" to create a new MOOSE-based application.
+CARIBOU is a multiphysics transport code for environmental assessment of nuclear accidents under development at the [Ontario Tech University](https://ontariotechu.ca/).
 
-For more information see: [http://mooseframework.org/create-an-app/](http://mooseframework.org/create-an-app/)
+CARIBOU is a MOOSE-based application. For more information on MOOSE see: [https://www.mooseframework.org/](https://www.mooseframework.org/).
