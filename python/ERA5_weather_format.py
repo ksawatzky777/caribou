@@ -1,28 +1,13 @@
 # -*- coding: utf-8 -*-
 """
 This is a data formatting script to extract long-lat data from ERA5 GRIB1 and 
-GRIB2 files from the climate data store and than convert the lat-long data to 
-a cartesian coordinate system suitable for CARIBOU input.
+GRIB2 files available in the climate data store and than convert the lat-long 
+data to a cartesian coordinate system suitable for CARIBOU input.
 """
-
 import pygrib
 import numpy as np
 import pandas as pd
 import os
-import sys
-
-def convert_by_radius(file, p_lat, p_long, r, r_earth=6367.47):
-    """
-    This function is not complete.
-    TODO: Complete this.
-    """
-    #Open the GRIB file.
-    grbs = pygrib.open(file)
-    grb_u = grbs.select(name='U component of wind')
-    grb_v = grbs.select(name='V component of wind')
-    grb_w = grbs.select(name='Vertical velocity')
-    
-    pass #Add the return later.
 
 def convert_by_latlong(file, point1, point2, p_level, deltas=[31, 31]):
     """
@@ -39,7 +24,7 @@ def convert_by_latlong(file, point1, point2, p_level, deltas=[31, 31]):
         point2: python list where entry 0 is the latitude and entry 1 is the 
         longitude.
         p_level: python list of isobaric pressure levels.
-        delta: python list of coordinate transformation factors to convert 
+        deltas: python list of coordinate transformation factors to convert 
         lat/long values to x (entry 0) and y (entry 1) values. By default, 
         this is 31 km between datapoints in both lat and long (default for 
         ERA5 reanalysis). 
@@ -55,7 +40,6 @@ def convert_by_latlong(file, point1, point2, p_level, deltas=[31, 31]):
         datapoint in columns 1, 2 and 3. The remaining data is contained in 
         columns 1 -> n, where n is the number of pressure levels.
     """
-    
     print('Converting data, this will take some time')
     
     #Declaring output directory
@@ -111,7 +95,8 @@ def convert_by_latlong(file, point1, point2, p_level, deltas=[31, 31]):
     
     #Loop through each pressure level.
     for i in range(len(p_level)):
-        #Designate GRIB messages for each velocity at each pressure level.
+        #Designate GRIB messages for each velocity component at each pressure 
+        #level.
         grb_u = grbs.select(name='U component of wind',
                             typeOfLevel='isobaricInhPa', level=p_level[i])[0]
         grb_v = grbs.select(name='V component of wind',
@@ -148,4 +133,5 @@ def convert_by_latlong(file, point1, point2, p_level, deltas=[31, 31]):
     df_v.to_csv(v_out_file, index=False)
     df_w.to_csv(w_out_file, index=False)
     
-    return "Coordinate transform complete. csv files have been written."
+    return 'Coordinate transform complete. csv files have been written.'
+
