@@ -28,7 +28,6 @@ def convert_by_latlong(file, point1, point2, p_level, deltas=[31, 31]):
         lat/long values to x (entry 0) and y (entry 1) values. By default, 
         this is 31 km between datapoints in both lat and long (default for 
         ERA5 reanalysis). 
-        
     Outputs:
         u.csv (csv file containing the magnitude of the east-facing wind 
         component, m/s).
@@ -36,9 +35,10 @@ def convert_by_latlong(file, point1, point2, p_level, deltas=[31, 31]):
         component), m/s.
         w.csv (csv file containing the magnitude of the updraft velocity, 
         Pa/s).
-        All output csv files also contain the x-y-z coordinates of each 
-        datapoint in columns 1, 2 and 3. The remaining data is contained in 
-        columns 1 -> n, where n is the number of pressure levels.
+        All output csv files also contain the x-y coordinates of each 
+        datapoint in columns 1 and 2. The remaining data is contained in 
+        columns 1 -> n, where n is the number of pressure levels. The header 
+        for each column is the z coordinate of the pressure level.
     """
     print('Converting data, this will take some time')
     
