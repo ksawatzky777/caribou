@@ -32,7 +32,7 @@ def barometric_height(pressure):
     if pressure in p_b:
         #If the pressure is a definition pressure, returns the related 
         #definition height.
-        return h_b[p_b.index(pressure)]
+        return h_b[p_b.index(pressure)]/1000
     
     #Determine which section of the piecewise-exponential function is relevant
     #for the given pressure.
@@ -51,10 +51,10 @@ def barometric_height(pressure):
     elif pressure < p_b[6]:
         b = 6
     else:
-        raise ValueError
-        ('The barometric formula is not valid for this pressure')
+        raise ValueError('The barometric formula is not valid for this case')
     
     #Compute the height of the column of air, returning it in km.
-    return ((t_b[b]/((pressure/p_b[b])**
-                    (gas_const*(l_b[b]))/
-                    (g*molar_mass)) - t_b[b])/l_b[b] + h_b[b])/1000
+    exponent = (gas_const*l_b[b])/(g*molar_mass)
+    denom = (pressure/p_b[b])**(exponent)
+    
+    return (h_b[b] + ((t_b[b]/denom) - t_b[b])/(l_b[b]))/1000
