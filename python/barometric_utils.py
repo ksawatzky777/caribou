@@ -6,6 +6,8 @@ ERA5 and MERRA-2 for non-surface computations into the respective altitudes
 relative to the surface of the earth.
 """
 
+import math
+
 def barometric_height(pressure):
     """
     This function computes the height of a column of air above the earths 
@@ -53,8 +55,17 @@ def barometric_height(pressure):
     else:
         raise ValueError('The barometric formula is not valid for this case')
     
-    #Compute the height of the column of air, returning it in km.
-    exponent = (gas_const*l_b[b])/(g*molar_mass)
-    denom = (pressure/p_b[b])**(exponent)
+    if l_b[b] != 0.0:
+        #Compute the height of the column of air for a non-zero temperature 
+        #lapse rate, returning it in km.
+        exponent = (gas_const*l_b[b])/(g*molar_mass)
+        denom = (pressure/p_b[b])**(exponent)
     
-    return (h_b[b] + ((t_b[b]/denom) - t_b[b])/(l_b[b]))/1000
+        return (h_b[b] + ((t_b[b]/denom) - t_b[b])/(l_b[b]))/1000
+    else:
+        #Compute the height of the column of air for a temperature lapse rate
+        #which is equal to zero.
+        log = math.log(pressure/(p_b[b]))
+        denom = (gas_const*(t_b[b]))/((-g)*molar_mass)
+        
+        return (log*denom + h_b[b])/1000
