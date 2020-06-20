@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-This is a data formatting script to extract long-lat data from ERA5 GRIB1 and 
-GRIB2 files available in the climate data store and than convert the lat-long 
-data to a cartesian coordinate system suitable for CARIBOU input.
+This is a data formatting script which extracts long-lat data from ERA5 GRIB1 
+and GRIB2 files available in the climate data store and than convert the lat-
+long data to a cartesian coordinate system suitable for CARIBOU input.
 """
 import pygrib
 import numpy as np
 import pandas as pd
 import os
+import barometric_utils as bu
 
 def convert_by_latlong(file, point1, point2, p_level, deltas=[31, 31]):
     """
@@ -15,7 +16,9 @@ def convert_by_latlong(file, point1, point2, p_level, deltas=[31, 31]):
     the input parameters. It than converts the long/lat coordinates to an 
     x-y-z cartesian grid where (0,0,0) is located at point1. The resulting 
     coordinate transformed data is output to three csv files formatted to 
-    become initial conditions for CARIBOU executions.
+    become initial conditions for CARIBOU executions. Latitude must range 
+    between [90, -90], where 0 is the equator. Longitude must range 
+    between [0, 360], where 0 is the Prime Meridian.
     
     Input parameters:
         file: string of the filename.
@@ -36,11 +39,10 @@ def convert_by_latlong(file, point1, point2, p_level, deltas=[31, 31]):
         w.csv (csv file containing the magnitude of the updraft velocity, 
         Pa/s).
         All output csv files also contain the x-y coordinates of each 
-        datapoint in columns 1 and 2. The remaining data is contained in 
+        datapoint in columns 1 and 2 (km). The remaining data is contained in 
         columns 1 -> n, where n is the number of pressure levels. The header 
-        for each column is the z coordinate of the pressure level.
+        for each column is the z coordinate of the pressure level (km).
     """
-    print('Converting data, this will take some time')
     
     #Declaring output directory
     output_dir = './'
@@ -119,9 +121,9 @@ def convert_by_latlong(file, point1, point2, p_level, deltas=[31, 31]):
         flat_w = w.flatten()
         
         #Adjoining pressure level data to the end of the dataframes.
-        df_u[str(p_level[i])] = flat_u
-        df_v[str(p_level[i])] = flat_v
-        df_w[str(p_level[i])] = flat_w
+        df_u["z=" + str(bu.barometric_height(p_level[i]))] = flat_u
+        df_v["z=" + str(bu.barometric_height(p_level[i]))] = flat_v
+        df_w["z=" + str(bu.barometric_height(p_level[i]))] = flat_w
         
     #Generating file names.
     u_out_file = os.path.join(output_dir, 'u.csv')
@@ -133,5 +135,7 @@ def convert_by_latlong(file, point1, point2, p_level, deltas=[31, 31]):
     df_v.to_csv(v_out_file, index=False)
     df_w.to_csv(w_out_file, index=False)
     
+    #Close GRIB file
+    grbs.close()
+    
     return 'Coordinate transform complete. csv files have been written.'
-
