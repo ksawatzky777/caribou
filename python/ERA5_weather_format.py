@@ -38,10 +38,8 @@ def convert_by_latlong(file, point1, point2, p_level, deltas=[31, 31]):
         component), m/s.
         w.csv (csv file containing the magnitude of the updraft velocity, 
         Pa/s).
-        All output csv files also contain the x-y coordinates of each 
-        datapoint in columns 1 and 2 (km). The remaining data is contained in 
-        columns 1 -> n, where n is the number of pressure levels. The header 
-        for each column is the z coordinate of the pressure level (km).
+        All output csv files contain the x-y-z coordinates of the data in the 
+        first three columns, with the data following in column four.
     """
     
     #Declaring output directory
@@ -87,24 +85,67 @@ def convert_by_latlong(file, point1, point2, p_level, deltas=[31, 31]):
     flat_x = grid_x.flatten()
     flat_y = grid_y.flatten()
     
+    #Building the first z component array.
+    flat_z_1 = np.full_like(flat_x, bu.barometric_height(p_level[0]))
+    
     #Building initial dictionaries for the dataframes.
-    coords = {'x': flat_x, 'y': flat_y}
+    coords = {'x': flat_x, 'y': flat_y, 'z': flat_z_1}
     
     #Building 3 pandas dataframes to store the data.
     df_u = pd.DataFrame(data=coords)
     df_v = pd.DataFrame(data=coords)
     df_w = pd.DataFrame(data=coords)
     
-    #Loop through each pressure level.
-    for i in range(len(p_level)):
+    #Building 3 pandas dataframes for temporary data storage.
+    t_coords = {'x': flat_x, 'y': flat_y}
+    t_df_u = pd.DataFrame(data=t_coords)
+    t_df_v = pd.DataFrame(data=t_coords)
+    t_df_w = pd.DataFrame(data=t_coords)
+    
+    #Designating a GRIB message for each velocity component at each pressure 
+    #level.
+    grb_u = grbs.select(name='U component of wind',
+                            typeOfLevel='isobaricInhPa',
+                            level=p_level[0])[0]
+    grb_v = grbs.select(name='V component of wind',
+                            typeOfLevel='isobaricInhPa',
+                            level=p_level[0])[0]
+    grb_w = grbs.select(name='Vertical velocity', 
+                            typeOfLevel='isobaricInhPa',
+                            level=p_level[0])[0]
+    
+    #Fetch data from the GRIB file and assign it to a numpy array for each
+    #pressure level.
+    u, lats, longs = grb_u.data(lat1=point1[0], lat2=point2[0], 
+                                    lon1=point1[1], lon2=point2[1])
+    v, lats, longs = grb_v.data(lat1=point1[0], lat2=point2[0], 
+                                    lon1=point1[1], lon2=point2[1])
+    w, lats, longs = grb_w.data(lat1=point1[0], lat2=point2[0], 
+                                    lon1=point1[1], lon2=point2[1])
+        
+    #Compressing the 2-D numpy arrays into 1-D numpy arrays
+    flat_u = u.flatten()
+    flat_v = v.flatten()
+    flat_w = w.flatten()
+    
+    #Adjoining data to the end of the dataframes.
+    df_u["data"] = flat_u
+    df_v["data"] = flat_v
+    df_w["data"] = flat_w
+    
+    #Loop through each pressure level other than the first.
+    for i in range(len(p_level) - 1):
         #Designate GRIB messages for each velocity component at each pressure 
         #level.
         grb_u = grbs.select(name='U component of wind',
-                            typeOfLevel='isobaricInhPa', level=p_level[i])[0]
+                            typeOfLevel='isobaricInhPa',
+                            level=p_level[i + 1])[0]
         grb_v = grbs.select(name='V component of wind',
-                            typeOfLevel='isobaricInhPa', level=p_level[i])[0]
+                            typeOfLevel='isobaricInhPa',
+                            level=p_level[i + 1])[0]
         grb_w = grbs.select(name='Vertical velocity', 
-                            typeOfLevel='isobaricInhPa', level=p_level[i])[0]
+                            typeOfLevel='isobaricInhPa',
+                            level=p_level[i + 1])[0]
 
         #Fetch data from the GRIB file and assign it to a numpy array for each
         #pressure level.
@@ -120,10 +161,22 @@ def convert_by_latlong(file, point1, point2, p_level, deltas=[31, 31]):
         flat_v = v.flatten()
         flat_w = w.flatten()
         
-        #Adjoining pressure level data to the end of the dataframes.
-        df_u["z=" + str(bu.barometric_height(p_level[i]))] = flat_u
-        df_v["z=" + str(bu.barometric_height(p_level[i]))] = flat_v
-        df_w["z=" + str(bu.barometric_height(p_level[i]))] = flat_w
+        #Generating a flattened z coordinate.
+        flat_z = np.full_like(flat_x, bu.barometric_height(p_level[i + 1]))
+        
+        #Storing flattened data to the temporary dataframes.
+        t_df_u["z"] = flat_z
+        t_df_v["z"] = flat_z
+        t_df_w["z"] = flat_z
+        
+        t_df_u["data"] = flat_u
+        t_df_v["data"] = flat_v
+        t_df_w["data"] = flat_w
+        
+        #Adjoining temporary dataframes to the output dataframes.
+        df_u = df_u.append(t_df_u, ignore_index=True)
+        df_v = df_v.append(t_df_v, ignore_index=True)
+        df_w = df_w.append(t_df_w, ignore_index=True)
         
     #Generating file names.
     u_out_file = os.path.join(output_dir, 'u.csv')
