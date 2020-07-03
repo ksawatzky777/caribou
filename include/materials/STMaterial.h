@@ -29,11 +29,14 @@ public:
 protected:
   virtual void computeQpProperties() override;
 
-  unsigned _num_dims;
-
   MooseEnum _interp_type;
 
-private:
   MaterialProperty<Real> & _diffusivity;
   MaterialProperty<RealVectorValue> & _velocity;
+
+  MooseUtils::DelimitedFileReader _csv_reader;
+
+  TrilinearInterpolation _tri_interp;
+  BilinearInterpolation _bi_interp;
+
 }
