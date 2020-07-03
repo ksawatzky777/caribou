@@ -1,0 +1,27 @@
+#include "STTimeDerivative.h"
+
+registerMooseObject("caribou", STTimeDerivative);
+
+template <>
+InputParameters
+validParams<STTimeDerivative>()
+{
+  InputParameters params = validParams<STTimeDerivative>();
+  return params;
+}
+
+STTimeDerivative::STTimeDerivative(const InputParameters & parameters)
+  : STTimeDerivative(parameters)
+{
+}
+
+Real STTimeDerivative::computeQpResidual()
+{
+  return TimeDerivative::computeQpResidual();
+}
+
+Real
+STTimeDerivative::computeQpJacobian()
+{
+  return TimeDerivative::computeQpJacobian();
+}
