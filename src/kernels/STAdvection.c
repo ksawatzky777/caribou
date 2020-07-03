@@ -12,7 +12,7 @@ validParams<STAdvection>()
 
 STAdvection::STAdvection(const InputParameters & parameters)
   : Kernel(parameters),
-  _velocity(getMaterialProperty<RealVectorValue>("_velocity"))
+  _velocity(getMaterialProperty<RealVectorValue>("velocity"))
 {
 }
 
