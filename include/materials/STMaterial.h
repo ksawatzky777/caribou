@@ -26,9 +26,23 @@ public:
    }
 
 protected:
-  virtual void computeQpProperties() override;
+  void bilinearConstruct(std::string & _u_file_name,
+                         std::string & _v_file_name);
+  void trilinearConstruct(std::string & _u_file_name,
+                          std::string & _v_file_name,
+                          std::string & _w_file_name);
+
+  virtual void computeQpProperties();
+  virtual void bilinearComputeQpProperties();
+  virtual void trilinearComputeQpProperties();
 
   MooseEnum _interp_type;
+
+  std::string _delimiter;
+
+  std::vector<Real> _u_data;
+  std::vector<Real> _v_data;
+  std::vector<Real> _w_data;
 
   MaterialProperty<Real> & _diffusivity;
   MaterialProperty<RealVectorValue> & _velocity;
