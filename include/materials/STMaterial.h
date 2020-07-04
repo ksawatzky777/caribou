@@ -37,7 +37,6 @@ protected:
   virtual void trilinearComputeQpProperties();
 
   MooseEnum _interp_type;
-
   std::string _delimiter;
 
   std::vector<Real> _u_data;

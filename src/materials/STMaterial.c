@@ -50,35 +50,66 @@ STMaterial::STMaterial(const InputParameters & parameters)
     case BILINEAR:
     {
       if (getParam<unsigned>("num_dims") == 2)
+      {
         bilinearConstruct(_u_file_name, _v_file_name);
+      }
       else
-        mooseError("Number of dimensions don't match the interpolation scheme");
+      {
+        mooseError("Number of dimensions don't match the interpolation scheme "
+                   ".");
+      }
       break;
     }
     case TRILINEAR:
     {
-      if (getParam<unsigned>("num_dims") == 3)
+      if (getParam<unsigned>("num_dims") == 3
+          && parameter.isParamSetByUser("w_file_name"))
+      {
         std::string _w_file_name = getParam<std::string>("w_file_name");
         trilinearConstruct(_u_file_name, _v_file_name, _w_file_name);
+      }
       else
-        mooseError("Number of dimensions don't match the interpolation scheme");
+      {
+        mooseError("Number of dimensions don't match the interpolation scheme "
+                   "or the w_file_name was not provided.");
+      }
       break;
     }
     default:{
-      mooseError("Wrong enum type.");
+      mooseError("Invalid enum type.");
     }
   }
 }
 
-void STMaterial::bilinearConstruct(std::string & _u_file_name,
+void
+STMaterial::bilinearConstruct(std::string & _u_file_name,
                                    std::string & _v_file_name)
 {
 
 }
 
-void STMaterial::trilinearConstruct(std::string & _u_file_name,
+void
+STMaterial::trilinearConstruct(std::string & _u_file_name,
                                     std::string & _v_file_name,
                                     std::string & _w_file_name)
+{
+
+}
+
+void
+STMaterial::bilinearComputeQpProperties()
+{
+
+}
+
+void
+STMaterial::trilinearComputeQpProperties()
+{
+
+}
+
+void
+STMaterial::computeQpProperties()
 {
 
 }
