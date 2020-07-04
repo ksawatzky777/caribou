@@ -1,6 +1,6 @@
 #include "STDiffusion.h"
 
-registerMooseObject("caribou", STDiffusion);
+registerMooseObject("caribouApp", STDiffusion);
 
 template <>
 InputParameters

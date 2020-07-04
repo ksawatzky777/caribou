@@ -1,6 +1,6 @@
 #include "STTimeDerivative.h"
 
-registerMooseObject("caribou", STTimeDerivative);
+registerMooseObject("caribouApp", STTimeDerivative);
 
 template <>
 InputParameters

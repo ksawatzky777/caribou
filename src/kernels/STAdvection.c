@@ -1,6 +1,6 @@
 #include "STAdvection.h"
 
-registerMooseObject("caribou", STAdvection);
+registerMooseObject("caribouApp", STAdvection);
 
 template <>
 InputParameters
