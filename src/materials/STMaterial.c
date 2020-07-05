@@ -45,13 +45,18 @@ STMaterial::STMaterial(const InputParameters & parameters)
   std::string _u_file_name = getParam<std::string>("u_file_name");
   std::string _v_file_name = getParam<std::string>("v_file_name");
 
+  if (parameters.isParamSetByUser("delimiter"))
+    std::string _delimiter = getParam<std::string>("delimiter");
+  else
+    std::string _delimiter = ",";
+
   switch (_interp_type)
   {
     case BILINEAR:
     {
       if (getParam<unsigned>("num_dims") == 2)
       {
-        bilinearConstruct(_u_file_name, _v_file_name);
+        bilinearConstruct(_u_file_name, _v_file_name, _delimiter);
       }
       else
       {
@@ -63,10 +68,11 @@ STMaterial::STMaterial(const InputParameters & parameters)
     case TRILINEAR:
     {
       if (getParam<unsigned>("num_dims") == 3
-          && parameter.isParamSetByUser("w_file_name"))
+          && parameters.isParamSetByUser("w_file_name"))
       {
         std::string _w_file_name = getParam<std::string>("w_file_name");
-        trilinearConstruct(_u_file_name, _v_file_name, _w_file_name);
+        trilinearConstruct(_u_file_name, _v_file_name, _w_file_name, _delimiter
+                          );
       }
       else
       {
@@ -75,7 +81,8 @@ STMaterial::STMaterial(const InputParameters & parameters)
       }
       break;
     }
-    default:{
+    default:
+    {
       mooseError("Invalid enum type.");
     }
   }
@@ -83,17 +90,45 @@ STMaterial::STMaterial(const InputParameters & parameters)
 
 void
 STMaterial::bilinearConstruct(std::string & _u_file_name,
-                                   std::string & _v_file_name)
+                              std::string & _v_file_name,
+                              std::string & _delimiter)
 {
+  MooseUtils::DelimitedFileReader _u_reader(_u_file_name);
+  MooseUtils::DelimitedFileReader _v_reader(_u_file_name);
 
+  _u_reader.setDelimiter(_delimiter);
+  _v_reader.setDelimiter(_delimiter);
+
+  _u_reader.read();
+  _v_reader.read();
+
+  const std::vector<std::string> & _u_data_names = _u_reader.getNames();
+  const std::vector<std::string> & _v_data_names = _v_reader.getNames();
+
+  if (_u_data_names.size() != _v_data_names.size())
+    mooseError("Data files have mismatched dimensions.");
+
+  if (_u_data_names.size() != 3)
+    mooseError("Data files are not formatted for a 2D problem.");
+  else if (_v_data_names.size() != 3)
+    mooseError("Data files are not formatted for a 2D problem.");
+
+  
 }
 
 void
 STMaterial::trilinearConstruct(std::string & _u_file_name,
-                                    std::string & _v_file_name,
-                                    std::string & _w_file_name)
+                               std::string & _v_file_name,
+                               std::string & _w_file_name,
+                               std::string & _delimiter)
 {
+  MooseUtils::DelimitedFileReader _u_reader(_u_file_name);
+  MooseUtils::DelimitedFileReader _v_reader(_u_file_name);
+  MooseUtils::DelimitedFileReader _w_reader(_w_file_name);
 
+  _u_reader.setDelimiter(_delimiter);
+  _v_reader.setDelimiter(_delimiter);
+  _w_reader.setDelimiter(_delimiter);
 }
 
 void

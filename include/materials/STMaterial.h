@@ -27,21 +27,21 @@ public:
 
 protected:
   void bilinearConstruct(std::string & _u_file_name,
-                         std::string & _v_file_name);
+                         std::string & _v_file_name,
+                         std::string & _delimiter);
   void trilinearConstruct(std::string & _u_file_name,
                           std::string & _v_file_name,
-                          std::string & _w_file_name);
+                          std::string & _w_file_name,
+                          std::string & _delimiter);
 
   virtual void computeQpProperties();
   virtual void bilinearComputeQpProperties();
   virtual void trilinearComputeQpProperties();
 
   MooseEnum _interp_type;
-  std::string _delimiter;
 
-  std::vector<Real> _u_data;
-  std::vector<Real> _v_data;
-  std::vector<Real> _w_data;
+  std::vector<TrilinearInterpolation> _tri_interp;
+  std::vector<BilinearInterpolation> _bi_interp;
 
   MaterialProperty<Real> & _diffusivity;
   MaterialProperty<RealVectorValue> & _velocity;
