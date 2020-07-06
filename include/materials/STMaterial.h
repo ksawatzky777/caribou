@@ -40,8 +40,10 @@ protected:
 
   MooseEnum _interp_type;
 
-  std::vector<TrilinearInterpolation> _tri_interp;
   std::vector<BilinearInterpolation> _bi_interp;
+  std::vector<TrilinearInterpolation> _tri_interp;
+
+  Real _param_diffusivity;
 
   MaterialProperty<Real> & _diffusivity;
   MaterialProperty<RealVectorValue> & _velocity;

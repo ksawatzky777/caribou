@@ -40,7 +40,7 @@ STMaterial::STMaterial(const InputParameters & parameters)
     _velocity(declareProperty<RealVectorValue>("velocity")),
     _interp_type(getParam<MooseEnum>("interp_type"))
 {
-  _diffusivity = getParam<Real>("diffusivity");
+  _param_diffusivity = getParam<Real>("diffusivity");
 
   std::string _u_file_name = getParam<std::string>("u_file_name");
   std::string _v_file_name = getParam<std::string>("v_file_name");
@@ -105,15 +105,18 @@ STMaterial::bilinearConstruct(std::string & _u_file_name,
   const std::vector<std::string> & _u_data_names = _u_reader.getNames();
   const std::vector<std::string> & _v_data_names = _v_reader.getNames();
 
-  if (_u_data_names.size() != _v_data_names.size())
-    mooseError("Data files have mismatched dimensions.");
-
   if (_u_data_names.size() != 3)
     mooseError("Data files are not formatted for a 2D problem.");
   else if (_v_data_names.size() != 3)
     mooseError("Data files are not formatted for a 2D problem.");
 
-  
+  _bi_interp.resize(2);
+  _bi_interp[0] = BilinearInterpolation(_u_reader.getData(_u_data_names(0)),
+                                        _u_reader.getData(_u_data_names(1)),
+                                        _u_reader.getData(_u_data_names(2)));
+  _bi_interp[1] = BilinearInterpolation(_v_reader.getData(_v_data_names(0)),
+                                        _v_reader.getData(_v_data_names(1)),
+                                        _v_reader.getData(_v_data_names(2)));
 }
 
 void
@@ -129,22 +132,90 @@ STMaterial::trilinearConstruct(std::string & _u_file_name,
   _u_reader.setDelimiter(_delimiter);
   _v_reader.setDelimiter(_delimiter);
   _w_reader.setDelimiter(_delimiter);
+
+  _u_reader.read();
+  _v_reader.read();
+  _w_reader.read();
+
+  const std::vector<std::string> & _u_data_names = _u_reader.getNames();
+  const std::vector<std::string> & _v_data_names = _v_reader.getNames();
+  const std::vector<std::string> & _w_data_names = _w_reader.getNames();
+
+  if (_u_data_names.size() != 4)
+    mooseError("Data files are not formatted for a 3D problem.");
+  else if (_v_data_names.size() != 4)
+    mooseError("Data files are not formatted for a 3D problem.");
+  else if (_w_data_names.size() != 4)
+    mooseError("Data files are not formatted for a 3D problem.");
+
+  _tri_interp.resize(3);
+  _tri_interp[0] = TrilinearInterpolation(_u_reader.getData(_u_data_names(0)),
+                                          _u_reader.getData(_u_data_names(1)),
+                                          _u_reader.getData(_u_data_names(2)),
+                                          _u_reader.getData(_u_data_names(3)));
+  _tri_interp[1] = TrilinearInterpolation(_v_reader.getData(_v_data_names(0)),
+                                          _v_reader.getData(_v_data_names(1)),
+                                          _v_reader.getData(_v_data_names(2)),
+                                          _v_reader.getData(_v_data_names(3)));
+  _tri_interp[2] = TrilinearInterpolation(_w_reader.getData(_u_data_names(0)),
+                                          _w_reader.getData(_u_data_names(1)),
+                                          _w_reader.getData(_u_data_names(2)),
+                                          _w_reader.getData(_u_data_names(3)));
 }
 
 void
 STMaterial::bilinearComputeQpProperties()
 {
+  _diffusivity[_qp] = _param_diffusivity;
 
+  _velocity[_qp] = {_bi_interp[0].sample(_qp[0], _qp[1]),
+                    _bi_interp[1].sample(_qp[0], _qp[1])};
 }
 
 void
 STMaterial::trilinearComputeQpProperties()
 {
+  _diffusivity[_qp] = _param_diffusivity;
 
+  _velocity[_qp] = {_tri_interp[0].sample(_qp[0], _qp[1], _qp[2]),
+                    _tri_interp[1].sample(_qp[0], _qp[1], _qp[2]),
+                    _tri_interp[2].sample(_qp[0], _qp[1], _qp[2])};
 }
 
 void
 STMaterial::computeQpProperties()
 {
-
+  switch (_interp_type)
+  {
+    case BILINEAR:
+    {
+      if (getParam<unsigned>("num_dims") == 2)
+      {
+        bilinearComputeQpProperties();
+      }
+      else
+      {
+        mooseError("Number of dimensions don't match the interpolation scheme"
+                   ".");
+      }
+      break;
+    }
+    case TRILINEAR:
+    {
+      if (getParam<unsigned>("num_dims") == 3)
+      {
+        trilinearComputeQpProperties();
+      }
+      else
+      {
+        mooseError("Number of dimensions don't match the interpolation scheme"
+                   ".");
+      }
+      break;
+    }
+    default:
+    {
+      mooseError("Invalid enum type.");
+    }
+  }
 }
