@@ -44,11 +44,11 @@ STMaterial::STMaterial(const InputParameters & parameters)
 
   std::string _u_file_name = getParam<std::string>("u_file_name");
   std::string _v_file_name = getParam<std::string>("v_file_name");
-
+  std::string _delimiter;
   if (parameters.isParamSetByUser("delimiter"))
-    std::string _delimiter = getParam<std::string>("delimiter");
+    _delimiter = getParam<std::string>("delimiter");
   else
-    std::string _delimiter = ",";
+    _delimiter = ",";
 
   switch (_interp_type)
   {
@@ -111,12 +111,12 @@ STMaterial::bilinearConstruct(std::string & _u_file_name,
     mooseError("Data files are not formatted for a 2D problem.");
 
   _bi_interp.resize(2);
-  _bi_interp[0] = BilinearInterpolation(_u_reader.getData(_u_data_names[0]),
-                                        _u_reader.getData(_u_data_names[1]),
-                                        _u_reader.getData(_u_data_names[2]));
-  _bi_interp[1] = BilinearInterpolation(_v_reader.getData(_v_data_names[0]),
-                                        _v_reader.getData(_v_data_names[1]),
-                                        _v_reader.getData(_v_data_names[2]));
+  _bi_interp[0](_u_reader.getData(_u_data_names[0]),
+                _u_reader.getData(_u_data_names[1]),
+                _u_reader.getData(_u_data_names[2]));
+  _bi_interp[1](_v_reader.getData(_v_data_names[0]),
+                _v_reader.getData(_v_data_names[1]),
+                _v_reader.getData(_v_data_names[2]));
 }
 
 void
@@ -149,18 +149,18 @@ STMaterial::trilinearConstruct(std::string & _u_file_name,
     mooseError("Data files are not formatted for a 3D problem.");
 
   _tri_interp.resize(3);
-  _tri_interp[0] = TrilinearInterpolation(_u_reader.getData(_u_data_names[0]),
-                                          _u_reader.getData(_u_data_names[1]),
-                                          _u_reader.getData(_u_data_names[2]),
-                                          _u_reader.getData(_u_data_names[3]));
-  _tri_interp[1] = TrilinearInterpolation(_v_reader.getData(_v_data_names[0]),
-                                          _v_reader.getData(_v_data_names[1]),
-                                          _v_reader.getData(_v_data_names[2]),
-                                          _v_reader.getData(_v_data_names[3]));
-  _tri_interp[2] = TrilinearInterpolation(_w_reader.getData(_u_data_names[0]),
-                                          _w_reader.getData(_u_data_names[1]),
-                                          _w_reader.getData(_u_data_names[2]),
-                                          _w_reader.getData(_u_data_names[3]));
+  _tri_interp[0](_u_reader.getData(_u_data_names[0]),
+                _u_reader.getData(_u_data_names[1]),
+                _u_reader.getData(_u_data_names[2]),
+                _u_reader.getData(_u_data_names[3]));
+  _tri_interp[1](_v_reader.getData(_v_data_names[0]),
+                 _v_reader.getData(_v_data_names[1]),
+                 _v_reader.getData(_v_data_names[2]),
+                 _v_reader.getData(_v_data_names[3]));
+  _tri_interp[2](_w_reader.getData(_u_data_names[0]),
+                 _w_reader.getData(_u_data_names[1]),
+                 _w_reader.getData(_u_data_names[2]),
+                 _w_reader.getData(_u_data_names[3]));
 }
 
 void
@@ -168,8 +168,8 @@ STMaterial::bilinearComputeQpProperties()
 {
   _diffusivity[_qp] = _param_diffusivity;
 
-  _velocity[_qp] = {_bi_interp[0].sample(_q_point[_qp][0], _q_point[_qp][1]),
-                    _bi_interp[1].sample(_q_point[_qp][0], _q_point[_qp][1])};
+  _velocity[_qp] = {_bi_interp[0].sample(_q_point[_qp](0), _q_point[_qp](1)),
+                    _bi_interp[1].sample(_q_point[_qp](0), _q_point[_qp](1))};
 }
 
 void
@@ -177,12 +177,12 @@ STMaterial::trilinearComputeQpProperties()
 {
   _diffusivity[_qp] = _param_diffusivity;
 
-  _velocity[_qp] = {_tri_interp[0].sample(_q_point[_qp][0], _q_point[_qp][1],
-                    _q_point[_qp][2]),
-                    _tri_interp[1].sample(_q_point[_qp][0], _q_point[_qp][1],
-                    _q_point[_qp][2]),
-                    _tri_interp[2].sample(_q_point[_qp][0], _q_point[_qp][1],
-                    _q_point[_qp][2])};
+  _velocity[_qp] = {_tri_interp[0].sample(_q_point[_qp](0), _q_point[_qp](1),
+                    _q_point[_qp](2)),
+                    _tri_interp[1].sample(_q_point[_qp](0), _q_point[_qp](1),
+                    _q_point[_qp](2)),
+                    _tri_interp[2].sample(_q_point[_qp](0), _q_point[_qp](1),
+                    _q_point[_qp](2))};
 }
 
 void
