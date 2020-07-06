@@ -11,7 +11,7 @@ validParams<STTimeDerivative>()
 }
 
 STTimeDerivative::STTimeDerivative(const InputParameters & parameters)
-  : STTimeDerivative(parameters)
+  : TimeDerivative(parameters)
 {
 }
 

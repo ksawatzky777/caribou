@@ -47,4 +47,4 @@ protected:
 
   MaterialProperty<Real> & _diffusivity;
   MaterialProperty<RealVectorValue> & _velocity;
-}
+};
