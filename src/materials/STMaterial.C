@@ -2,7 +2,7 @@
 #include "MooseUtils.h"
 #include "DelimitedFileReader.h"
 
-registerMooseObject("caribou", STMaterial);
+registerMooseObject("caribouApp", STMaterial);
 
 template <>
 InputParameters
@@ -15,7 +15,7 @@ validParams<STMaterial>()
   params.addRequiredParam<MooseEnum>("interp_type", STMaterial::interpTypes(),
                                      "The type of interpolation to perform. It "
                                      "also implicitly defines the number "
-                                     "of dimensions for the problem. BILINEAR "
+                                     "of dimensions for the problem. BICUBIC "
                                      "for 2 dimensions and TRILINEAR for "
                                      "3.");
   params.addRequiredParam<std::string>("u_file_name", "Name of the file for the"
@@ -44,19 +44,18 @@ STMaterial::STMaterial(const InputParameters & parameters)
 
   std::string _u_file_name = getParam<std::string>("u_file_name");
   std::string _v_file_name = getParam<std::string>("v_file_name");
-  std::string _delimiter;
+  std::string _delimiter = ",";
+
   if (parameters.isParamSetByUser("delimiter"))
     _delimiter = getParam<std::string>("delimiter");
-  else
-    _delimiter = ",";
 
   switch (_interp_type)
   {
-    case BILINEAR:
+    case BICUBIC:
     {
       if (getParam<unsigned>("num_dims") == 2)
       {
-        bilinearConstruct(_u_file_name, _v_file_name, _delimiter);
+        twoDConstruct(_u_file_name, _v_file_name, _delimiter);
       }
       else
       {
@@ -71,7 +70,7 @@ STMaterial::STMaterial(const InputParameters & parameters)
           && parameters.isParamSetByUser("w_file_name"))
       {
         std::string _w_file_name = getParam<std::string>("w_file_name");
-        trilinearConstruct(_u_file_name, _v_file_name, _w_file_name, _delimiter
+        threeDConstruct(_u_file_name, _v_file_name, _w_file_name, _delimiter
                           );
       }
       else
@@ -89,7 +88,7 @@ STMaterial::STMaterial(const InputParameters & parameters)
 }
 
 void
-STMaterial::bilinearConstruct(std::string & _u_file_name,
+STMaterial::twoDConstruct(std::string & _u_file_name,
                               std::string & _v_file_name,
                               std::string & _delimiter)
 {
@@ -110,17 +109,25 @@ STMaterial::bilinearConstruct(std::string & _u_file_name,
   else if (_v_data_names.size() != 3)
     mooseError("Data files are not formatted for a 2D problem.");
 
-  _bi_interp.resize(2);
-  _bi_interp[0](_u_reader.getData(_u_data_names[0]),
+  std::vector<Real> _fake_z_coords_u;
+  std::vector<Real> _fake_z_coords_v;
+  _fake_z_coords_u.resize(_u_reader.getData(_u_data_names[0]).size(), 0.0);
+  _fake_z_coords_v.resize(_v_reader.getData(_v_data_names[0]).size(), 0.0);
+
+  _2_d_interp.push_back(TrilinearInterpolation(
+                _u_reader.getData(_u_data_names[0]),
                 _u_reader.getData(_u_data_names[1]),
-                _u_reader.getData(_u_data_names[2]));
-  _bi_interp[1](_v_reader.getData(_v_data_names[0]),
+                _u_reader.getData(_u_data_names[2]),
+                _fake_z_coords_u));
+  _2_d_interp.push_back(TrilinearInterpolation(
+                _v_reader.getData(_v_data_names[0]),
                 _v_reader.getData(_v_data_names[1]),
-                _v_reader.getData(_v_data_names[2]));
+                _v_reader.getData(_v_data_names[2]),
+                _fake_z_coords_v));
 }
 
 void
-STMaterial::trilinearConstruct(std::string & _u_file_name,
+STMaterial::threeDConstruct(std::string & _u_file_name,
                                std::string & _v_file_name,
                                std::string & _w_file_name,
                                std::string & _delimiter)
@@ -148,40 +155,43 @@ STMaterial::trilinearConstruct(std::string & _u_file_name,
   else if (_w_data_names.size() != 4)
     mooseError("Data files are not formatted for a 3D problem.");
 
-  _tri_interp.resize(3);
-  _tri_interp[0](_u_reader.getData(_u_data_names[0]),
+  _3_d_interp.push_back(TrilinearInterpolation(
+                _u_reader.getData(_u_data_names[0]),
                 _u_reader.getData(_u_data_names[1]),
                 _u_reader.getData(_u_data_names[2]),
-                _u_reader.getData(_u_data_names[3]));
-  _tri_interp[1](_v_reader.getData(_v_data_names[0]),
+                _u_reader.getData(_u_data_names[3])));
+  _3_d_interp.push_back(TrilinearInterpolation(
+                 _v_reader.getData(_v_data_names[0]),
                  _v_reader.getData(_v_data_names[1]),
                  _v_reader.getData(_v_data_names[2]),
-                 _v_reader.getData(_v_data_names[3]));
-  _tri_interp[2](_w_reader.getData(_u_data_names[0]),
+                 _v_reader.getData(_v_data_names[3])));
+  _3_d_interp.push_back(TrilinearInterpolation(
+                 _w_reader.getData(_u_data_names[0]),
                  _w_reader.getData(_u_data_names[1]),
                  _w_reader.getData(_u_data_names[2]),
-                 _w_reader.getData(_u_data_names[3]));
+                 _w_reader.getData(_u_data_names[3])));
 }
 
 void
-STMaterial::bilinearComputeQpProperties()
+STMaterial::twoDComputeQpProperties()
 {
   _diffusivity[_qp] = _param_diffusivity;
 
-  _velocity[_qp] = {_bi_interp[0].sample(_q_point[_qp](0), _q_point[_qp](1)),
-                    _bi_interp[1].sample(_q_point[_qp](0), _q_point[_qp](1))};
+  _velocity[_qp] = {_2_d_interp[0].sample(_q_point[_qp](0), _q_point[_qp](1),
+                    0.0), _2_d_interp[1].sample(_q_point[_qp](0),
+                    _q_point[_qp](1), 0.0), 0.0};
 }
 
 void
-STMaterial::trilinearComputeQpProperties()
+STMaterial::threeDComputeQpProperties()
 {
   _diffusivity[_qp] = _param_diffusivity;
 
-  _velocity[_qp] = {_tri_interp[0].sample(_q_point[_qp](0), _q_point[_qp](1),
+  _velocity[_qp] = {_3_d_interp[0].sample(_q_point[_qp](0), _q_point[_qp](1),
                     _q_point[_qp](2)),
-                    _tri_interp[1].sample(_q_point[_qp](0), _q_point[_qp](1),
+                    _3_d_interp[1].sample(_q_point[_qp](0), _q_point[_qp](1),
                     _q_point[_qp](2)),
-                    _tri_interp[2].sample(_q_point[_qp](0), _q_point[_qp](1),
+                    _3_d_interp[2].sample(_q_point[_qp](0), _q_point[_qp](1),
                     _q_point[_qp](2))};
 }
 
@@ -190,11 +200,11 @@ STMaterial::computeQpProperties()
 {
   switch (_interp_type)
   {
-    case BILINEAR:
+    case BICUBIC:
     {
       if (getParam<unsigned>("num_dims") == 2)
       {
-        bilinearComputeQpProperties();
+        twoDComputeQpProperties();
       }
       else
       {
@@ -207,7 +217,7 @@ STMaterial::computeQpProperties()
     {
       if (getParam<unsigned>("num_dims") == 3)
       {
-        trilinearComputeQpProperties();
+        threeDComputeQpProperties();
       }
       else
       {

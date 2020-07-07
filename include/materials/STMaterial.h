@@ -2,7 +2,6 @@
 
 #include "Material.h"
 #include "TrilinearInterpolation.h"
-#include "BilinearInterpolation.h"
 
 class STMaterial;
 
@@ -16,32 +15,32 @@ public:
 
    enum INTERPOLATOR
    {
-    BILINEAR,
+    BICUBIC,
     TRILINEAR
    };
 
    static MooseEnum interpTypes()
    {
-     return MooseEnum("bilinear=0 trilinear=1");
+     return MooseEnum("bicubic=0 trilinear=1");
    }
 
 protected:
-  void bilinearConstruct(std::string & _u_file_name,
-                         std::string & _v_file_name,
-                         std::string & _delimiter);
-  void trilinearConstruct(std::string & _u_file_name,
-                          std::string & _v_file_name,
-                          std::string & _w_file_name,
-                          std::string & _delimiter);
+  void twoDConstruct(std::string & _u_file_name,
+                     std::string & _v_file_name,
+                     std::string & _delimiter);
+  void threeDConstruct(std::string & _u_file_name,
+                       std::string & _v_file_name,
+                       std::string & _w_file_name,
+                       std::string & _delimiter);
 
   virtual void computeQpProperties();
-  virtual void bilinearComputeQpProperties();
-  virtual void trilinearComputeQpProperties();
+  virtual void twoDComputeQpProperties();
+  virtual void threeDComputeQpProperties();
 
   MooseEnum _interp_type;
 
-  std::vector<BilinearInterpolation> _bi_interp;
-  std::vector<TrilinearInterpolation> _tri_interp;
+  std::vector<TrilinearInterpolation> _2_d_interp;
+  std::vector<TrilinearInterpolation> _3_d_interp;
 
   Real _param_diffusivity;
 
