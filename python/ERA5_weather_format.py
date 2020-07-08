@@ -73,20 +73,20 @@ def convert_by_latlong(file, point1, point2, p_level, deltas=[31, 31]):
     #Generating the 2-D cartesian grid from lats and longs.
     for i in range(np.shape(longs)[0]):
         for j in range(np.shape(longs)[1]):
-            grid_x[i,j] = i*(deltas[0])
+            grid_x[i,j] = i*(deltas[0])*(1000)
     
     for i in range(np.shape(lats)[0]):
         for j in range(np.shape(lats)[1]):
             i_ = (np.shape(lats)[0] - i - 1)
             j_ = (np.shape(lats)[1] - j - 1)
-            grid_y[i_,j_] = (j_)*(deltas[1])
+            grid_y[i_,j_] = (j_)*(deltas[1])*(1000)
     
     #Flatten both x and y grid components into 1-D arrays
     flat_x = grid_x.flatten()
     flat_y = grid_y.flatten()
     
     #Building the first z component array.
-    flat_z_1 = np.full_like(flat_x, bu.barometric_height(p_level[0]))
+    flat_z_1 = np.full_like(flat_x, (bu.barometric_height(p_level[0]))*1000)
     
     #Building initial dictionaries for the dataframes.
     coords = {'x': flat_x, 'y': flat_y, 'z': flat_z_1}
@@ -122,16 +122,11 @@ def convert_by_latlong(file, point1, point2, p_level, deltas=[31, 31]):
                                     lon1=point1[1], lon2=point2[1])
     w, lats, longs = grb_w.data(lat1=point1[0], lat2=point2[0], 
                                     lon1=point1[1], lon2=point2[1])
-        
-    #Compressing the 2-D numpy arrays into 1-D numpy arrays
-    flat_u = u.flatten()
-    flat_v = v.flatten()
-    flat_w = w.flatten()
     
     #Adjoining data to the end of the dataframes.
-    df_u["data"] = flat_u
-    df_v["data"] = flat_v
-    df_w["data"] = flat_w
+    df_u["data"] = u.flatten()
+    df_v["data"] = v.flatten()
+    df_w["data"] = w.flatten()
     
     #Loop through each pressure level other than the first.
     for i in range(len(p_level) - 1):
