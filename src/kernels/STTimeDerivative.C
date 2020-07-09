@@ -6,7 +6,7 @@ template <>
 InputParameters
 validParams<STTimeDerivative>()
 {
-  InputParameters params = validParams<STTimeDerivative>();
+  InputParameters params = validParams<TimeDerivative>();
   return params;
 }
 
