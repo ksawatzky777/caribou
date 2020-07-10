@@ -108,7 +108,7 @@ STMaterial::threeDConstruct(std::string & _u_file_name,
                             std::string & _delimiter)
 {
   MooseUtils::DelimitedFileReader _u_reader(_u_file_name);
-  MooseUtils::DelimitedFileReader _v_reader(_u_file_name);
+  MooseUtils::DelimitedFileReader _v_reader(_v_file_name);
   MooseUtils::DelimitedFileReader _w_reader(_w_file_name);
   MooseUtils::DelimitedFileReader _dim_reader(_dim_file_name);
 
@@ -131,17 +131,17 @@ STMaterial::threeDConstruct(std::string & _u_file_name,
                  _dim_reader.getData(_coord_names[0]),
                  _dim_reader.getData(_coord_names[1]),
                  _dim_reader.getData(_coord_names[2]),
-                 _u_reader.getData(_u_data_names[1])));
+                 _u_reader.getData(_u_data_names[0])));
   _3_d_interp.push_back(TrilinearInterpolation(
                  _dim_reader.getData(_coord_names[0]),
                  _dim_reader.getData(_coord_names[1]),
                  _dim_reader.getData(_coord_names[2]),
-                 _v_reader.getData(_v_data_names[3])));
+                 _v_reader.getData(_v_data_names[0])));
   _3_d_interp.push_back(TrilinearInterpolation(
                  _dim_reader.getData(_coord_names[0]),
                  _dim_reader.getData(_coord_names[1]),
                  _dim_reader.getData(_coord_names[2]),
-                 _w_reader.getData(_u_data_names[3])));
+                 _w_reader.getData(_w_data_names[0])));
 }
 
 void
