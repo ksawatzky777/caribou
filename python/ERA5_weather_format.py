@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 import os
 import barometric_utils as bu
+import csv
 
 def convert_by_latlong(file, point1, point2, p_level, deltas=[31, 31]):
     """
@@ -42,6 +43,8 @@ def convert_by_latlong(file, point1, point2, p_level, deltas=[31, 31]):
         first three columns, with the data following in column four.
     """
     
+    #FIX COORDS OUTPUT, CAN'T USE PANDAS
+    
     #Declaring output directory
     output_dir = './'
     
@@ -70,13 +73,24 @@ def convert_by_latlong(file, point1, point2, p_level, deltas=[31, 31]):
     grid_x = np.ones_like(longs)
     grid_y = np.ones_like(lats)
     
+    #Declaring numpy arrays for additional coordinate output.
+    x_out = np.ones(np.shape(longs)[0])
+    y_out = np.ones(np.shape(lats)[1])
+    z_out = np.ones(len(p_level))
+    
+    #Declaring the z coordinates for additional coordinate output.
+    for i in range(len(p_level)):
+        z_out[i] = bu.barometric_height(p_level[i])*1000
+
     #Generating the 2-D cartesian grid from lats and longs.
     for i in range(np.shape(longs)[0]):
+        x_out[i] = i*(deltas[0])*(1000)
         for j in range(np.shape(longs)[1]):
             grid_x[i,j] = i*(deltas[0])*(1000)
     
-    for i in range(np.shape(lats)[0]):
-        for j in range(np.shape(lats)[1]):
+    for j in range(np.shape(lats)[1]):
+        y_out[j] = (j)*(deltas[1])*(1000)
+        for i in range(np.shape(lats)[0]):
             i_ = (np.shape(lats)[0] - i - 1)
             j_ = (np.shape(lats)[1] - j - 1)
             grid_y[i_,j_] = (j_)*(deltas[1])*(1000)
@@ -91,7 +105,7 @@ def convert_by_latlong(file, point1, point2, p_level, deltas=[31, 31]):
     #Building initial dictionaries for the dataframes.
     coords = {'x': flat_x, 'y': flat_y, 'z': flat_z_1}
     
-    #Building 3 pandas dataframes to store the data.
+    #Building 4 pandas dataframes to store the data.
     df_u = pd.DataFrame(data=coords)
     df_v = pd.DataFrame(data=coords)
     df_w = pd.DataFrame(data=coords)
@@ -151,22 +165,18 @@ def convert_by_latlong(file, point1, point2, p_level, deltas=[31, 31]):
         w, lats, longs = grb_w.data(lat1=point1[0], lat2=point2[0], 
                                     lon1=point1[1], lon2=point2[1])
         
-        #Compressing the 2-D numpy arrays into 1-D numpy arrays
-        flat_u = u.flatten()
-        flat_v = v.flatten()
-        flat_w = w.flatten()
-        
         #Generating a flattened z coordinate.
-        flat_z = np.full_like(flat_x, bu.barometric_height(p_level[i + 1]))
+        flat_z = np.full_like(flat_x, 
+                              bu.barometric_height(p_level[i + 1]))*1000
         
         #Storing flattened data to the temporary dataframes.
         t_df_u["z"] = flat_z
         t_df_v["z"] = flat_z
         t_df_w["z"] = flat_z
         
-        t_df_u["data"] = flat_u
-        t_df_v["data"] = flat_v
-        t_df_w["data"] = flat_w
+        t_df_u["data"] = u.flatten()
+        t_df_v["data"] = v.flatten()
+        t_df_w["data"] = w.flatten()
         
         #Adjoining temporary dataframes to the output dataframes.
         df_u = df_u.append(t_df_u, ignore_index=True)
@@ -177,6 +187,7 @@ def convert_by_latlong(file, point1, point2, p_level, deltas=[31, 31]):
     u_out_file = os.path.join(output_dir, 'u.csv')
     v_out_file = os.path.join(output_dir, 'v.csv')
     w_out_file = os.path.join(output_dir, 'w.csv')
+    coords_out_file = os.path.join(output_dir, 'coords.csv')
     
     #Writing to files.
     df_u.to_csv(u_out_file, index=False)
