@@ -1,15 +1,13 @@
 [Mesh]
   type = GeneratedMesh
-  dim = 3
-  nx = 50
-  ny = 50
-  nz = 50
+  dim = 2
+  nx = 100
+  ny = 100
   xmin = 0.0
   xmax = 1550.0
   ymin = 0.0
   ymax = 1550.0
-  zmin = 0.0
-  zmax = 1550.0
+  zmax = 0.0
 []
 
 [Variables]
@@ -31,12 +29,12 @@
   [../]
 
   [./advc]
-    #type = STAdvection
+    #type = ConservativeAdvection
     #variable = concentration
-    type = ConservativeAdvection
+    #velocity = '-10.0 0.0 0.0'
+    #upwinding_type = full
+    type = STAdvection
     variable = concentration
-    velocity = '-10.0 0.0 1.0'
-    upwinding_type = full
   [../]
 
   [./time]
@@ -49,7 +47,7 @@
   [./srce]
     variable = concentration
     type = ConstantPointSource
-    value = 10.0
+    value = 1.0
     point = '775.0 775.0 0.0'
   [../]
 []
@@ -58,34 +56,28 @@
   [./left]
     type = OutflowBC
     variable = concentration
-    boundary = '0'
-    velocity = '-10.0 0.0 1.0'
-  [../]
-  [./top]
-    type = OutflowBC
-    variable = concentration
-    boundary = '4'
-    velocity = '-10.0 0.0 1.0'
+    boundary = '3'
+    velocity = '-10.0 0.0 0.0'
   [../]
 []
 
 [Materials]
   [./test]
     type = STMaterial
-    num_dims = 3
+    num_dims = 2
     u_file_name = u.csv
     v_file_name = v.csv
     w_file_name = w.csv
     dim_file_name = coords.csv
     diffusivity = 1.0
-    const_velocity = '-10.0 0.0 1.0'
+    const_velocity = '-10.0 0.0 0.0'
   [../]
 []
 
 [Executioner]
   type = Transient
   solve_type = 'PJFNK'
-  num_steps = 1000
+  num_steps = 10
   dt = 1
 []
 
