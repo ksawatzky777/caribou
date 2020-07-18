@@ -7,6 +7,9 @@ InputParameters
 validParams<STTimeDerivative>()
 {
   InputParameters params = validParams<TimeDerivative>();
+  params.addClassDescription("Currently identical to the TimeDerivative kernel."
+                             " Additional functionality pertinent to CARIBOU "
+                             "may be added later.");
   return params;
 }
 

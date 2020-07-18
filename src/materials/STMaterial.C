@@ -9,6 +9,9 @@ InputParameters
 validParams<STMaterial>()
 {
   InputParameters params = validParams<Material>();
+  params.addClassDescription("Generic scalar transport material which provides "
+                             "the variables required to implement advection-"
+                             "diffusion.");
   params.addRequiredParam<unsigned>("num_dims", "The number of dimensions "
                                     "the problem should consider.");
   params.addRequiredParam<std::string>("dim_file_name", "Name of the file which"

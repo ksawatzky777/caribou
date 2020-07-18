@@ -7,6 +7,9 @@ InputParameters
 validParams<STDiffusion>()
 {
   InputParameters params = validParams<Diffusion>();
+  params.addClassDescription("Implements the Laplacian opperator with a "
+                             "constant diffusion coefficient taken from the "
+                             "materials system.");
   return params;
 }
 
