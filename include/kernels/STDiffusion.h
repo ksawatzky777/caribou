@@ -2,7 +2,14 @@
 
 #include "Diffusion.h"
 
+// Forward Declaration
 class STDiffusion;
+
+/**
+ * Diffusion of the variable implemented by the Diffusion kernel (part of the
+ * MOOSE framework), with a diffusion coefficient provided by the material
+ * system.
+ */
 
 template <>
 InputParameters validParams<STDiffusion>();
@@ -16,5 +23,6 @@ protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
 
+  /// Diffusion coefficient provided by the material system.
   const MaterialProperty<Real> & _diffusivity;
 };

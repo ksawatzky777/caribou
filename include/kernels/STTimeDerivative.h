@@ -2,7 +2,14 @@
 
 #include "TimeDerivative.h"
 
+// Forward Declaration.
 class STTimeDerivative;
+
+/**
+ * Implements a generic time derivative. Currently it fully inherits from the
+ * TimeDerivative kernel but additional functionality may be added in the
+ * future.
+ */
 
 template <>
 InputParameters validParams<STTimeDerivative>();
