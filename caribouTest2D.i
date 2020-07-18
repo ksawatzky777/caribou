@@ -29,12 +29,9 @@
   [../]
 
   [./advc]
-    #type = ConservativeAdvection
-    #variable = concentration
-    #velocity = '-10.0 0.0 0.0'
-    #upwinding_type = full
     type = STAdvection
     variable = concentration
+    upwinding_type = full
   [../]
 
   [./time]
@@ -77,7 +74,7 @@
 [Executioner]
   type = Transient
   solve_type = 'PJFNK'
-  num_steps = 10
+  num_steps = 100
   dt = 1
 []
 

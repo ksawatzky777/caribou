@@ -31,11 +31,8 @@
   [../]
 
   [./advc]
-    #type = STAdvection
-    #variable = concentration
-    type = ConservativeAdvection
+    type = STAdvection
     variable = concentration
-    velocity = '-10.0 0.0 1.0'
     upwinding_type = full
   [../]
 
