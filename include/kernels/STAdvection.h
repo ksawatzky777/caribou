@@ -6,6 +6,16 @@
 //* a more elegent method of converting the ConservativeAdvection kernel to use
 //* the material system is developed.
 
+//* Original Copyright and Disclaimer:
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #pragma once
 
 #include "Kernel.h"
