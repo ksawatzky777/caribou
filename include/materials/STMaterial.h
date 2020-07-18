@@ -38,7 +38,6 @@ protected:
                        std::string & _dim_file_name,
                        std::string & _delimiter);
 
-  /// Default property compute function.
   virtual void computeQpProperties();
 
   /// Property compute method for 2D.
