@@ -31,6 +31,8 @@ protected:
   std::vector<TrilinearInterpolation> _2_d_interp;
   std::vector<TrilinearInterpolation> _3_d_interp;
 
+  bool _const_v;
+
   MaterialProperty<Real> & _diffusivity;
   MaterialProperty<RealVectorValue> & _velocity;
 };

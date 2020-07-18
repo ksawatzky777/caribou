@@ -28,6 +28,9 @@ validParams<STMaterial>()
   params.addRequiredParam<Real>("diffusivity", "Value of the diffusion "
                                 "coefficient, assumed constant across the "
                                 "whole domain.");
+  params.addParam<RealVectorValue>("const_velocity", "Velocity vector for "
+                                   "advection, overrides the velocity provided "
+                                   "by the datafiles.");
 
   return params;
 }
@@ -35,30 +38,37 @@ validParams<STMaterial>()
 STMaterial::STMaterial(const InputParameters & parameters)
   : Material(parameters),
     _diffusivity(declareProperty<Real>("diffusivity")),
-    _velocity(declareProperty<RealVectorValue>("velocity"))
+    _velocity(declareProperty<RealVectorValue>("material_velocity"))
 {
+    std::string _u_file_name = getParam<std::string>("u_file_name");
+    std::string _v_file_name = getParam<std::string>("v_file_name");
+    std::string _dim_file_name = getParam<std::string>("dim_file_name");
+    std::string _delimiter = ",";
 
-  std::string _u_file_name = getParam<std::string>("u_file_name");
-  std::string _v_file_name = getParam<std::string>("v_file_name");
-  std::string _dim_file_name = getParam<std::string>("dim_file_name");
-  std::string _delimiter = ",";
+    _const_v = parameters.isParamSetByUser("const_velocity");
 
   if (parameters.isParamSetByUser("delimiter"))
     _delimiter = getParam<std::string>("delimiter");
 
-  if (getParam<unsigned>("num_dims") == 2)
-    twoDConstruct(_u_file_name, _v_file_name, _dim_file_name, _delimiter);
-
-  if (getParam<unsigned>("num_dims") == 3
-      && parameters.isParamSetByUser("w_file_name"))
+  if (_const_v != true)
   {
-    std::string _w_file_name = getParam<std::string>("w_file_name");
-    threeDConstruct(_u_file_name, _v_file_name, _w_file_name, _dim_file_name,
-                    _delimiter);
+    if (getParam<unsigned>("num_dims") == 2)
+        twoDConstruct(_u_file_name, _v_file_name, _dim_file_name, _delimiter);
   }
-  else
+
+  if (_const_v != true)
   {
-    mooseError("w_file_name was not provided.");
+    if (getParam<unsigned>("num_dims") == 3
+        && parameters.isParamSetByUser("w_file_name"))
+    {
+     std::string _w_file_name = getParam<std::string>("w_file_name");
+     threeDConstruct(_u_file_name, _v_file_name, _w_file_name, _dim_file_name,
+                     _delimiter);
+    }
+    else
+    {
+     mooseError("w_file_name was not provided.");
+    }
   }
 }
 
@@ -170,9 +180,17 @@ STMaterial::threeDComputeQpProperties()
 void
 STMaterial::computeQpProperties()
 {
-  if (getParam<unsigned>("num_dims") == 2)
-    twoDComputeQpProperties();
+  if (_const_v != true)
+  {
+    if (getParam<unsigned>("num_dims") == 2)
+      twoDComputeQpProperties();
 
-  if (getParam<unsigned>("num_dims") == 3)
-    threeDComputeQpProperties();
+    if (getParam<unsigned>("num_dims") == 3)
+      threeDComputeQpProperties();
+  }
+  else
+  {
+    _diffusivity[_qp] = getParam<Real>("diffusivity");
+    _velocity[_qp] = getParam<RealVectorValue>("const_velocity");
+  }
 }
