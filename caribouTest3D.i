@@ -46,7 +46,7 @@
   [./srce]
     variable = concentration
     type = ConstantPointSource
-    value = 10.0
+    value = 100.0
     point = '775.0 775.0 0.0'
   [../]
 []
@@ -69,20 +69,19 @@
 [Materials]
   [./test]
     type = STMaterial
-    num_dims = 3
     u_file_name = u.csv
     v_file_name = v.csv
     w_file_name = w.csv
     dim_file_name = coords.csv
     diffusivity = 1.0
-    const_velocity = '-10.0 0.0 1.0'
+    #const_velocity = '-10.0 0.0 1.0'
   [../]
 []
 
 [Executioner]
   type = Transient
   solve_type = 'PJFNK'
-  num_steps = 1000
+  num_steps = 100
   dt = 1
 []
 
