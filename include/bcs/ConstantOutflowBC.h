@@ -11,15 +11,16 @@
 
 #include "IntegratedBC.h"
 
-class OutflowBC : public IntegratedBC
+class ConstantOutflowBC : public IntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  OutflowBC(const InputParameters & parameters);
+  ConstantOutflowBC(const InputParameters & parameters);
 
 protected:
-  RealVectorValue _velocity;
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
+
+  RealVectorValue _velocity;
 };

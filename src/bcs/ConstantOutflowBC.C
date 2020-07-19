@@ -7,34 +7,33 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "OutflowBC.h"
+#include "ConstantOutflowBC.h"
 #include "Function.h"
 
-registerMooseObject("caribouApp", OutflowBC);
+registerMooseObject("caribouApp", ConstantOutflowBC);
 
 InputParameters
-OutflowBC::validParams()
+ConstantOutflowBC::validParams()
 {
   InputParameters params = IntegratedBC::validParams();
   params.addRequiredParam<RealVectorValue>("velocity", "The velocity vector");
   return params;
 }
 
-OutflowBC::OutflowBC(const InputParameters & parameters)
+ConstantOutflowBC::ConstantOutflowBC(const InputParameters & parameters)
   : IntegratedBC(parameters),
-
     _velocity(getParam<RealVectorValue>("velocity"))
 {
 }
 
 Real
-OutflowBC::computeQpResidual()
+ConstantOutflowBC::computeQpResidual()
 {
   return _test[_i][_qp] * _u[_qp] * _velocity * _normals[_qp];
 }
 
 Real
-OutflowBC::computeQpJacobian()
+ConstantOutflowBC::computeQpJacobian()
 {
   return _test[_i][_qp] * _phi[_j][_qp] * _velocity * _normals[_qp];
 }
