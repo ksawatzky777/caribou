@@ -7,6 +7,8 @@ InputParameters
 validParams<SpeciesDecay>()
 {
   InputParameters params = validParams<Kernel>();
+  params.addClassDescription("Radioactive decay kernel which utilizes a decay"
+                             " constant from the materials system.");
   return params;
 }
 

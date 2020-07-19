@@ -16,6 +16,9 @@ validParams<STMaterial>()
   params.addRequiredParam<Real>("diffusivity", "Value of the diffusion "
                                 "coefficient, assumed constant across the "
                                 "whole domain.");
+  params.addParam<RealVectorValue>("const_velocity", "Velocity vector for "
+                                   "advection, overrides the velocity provided "
+                                   "by the datafiles.");
   params.addParam<std::string>("dim_file_name", " ", "Name of the file which"
                                        " contains the x-y-z interpolation "
                                        "points to be used in conjuction with "
@@ -30,9 +33,6 @@ validParams<STMaterial>()
                                "necessary for a 3D problem.");
   params.addParam<std::string>("delimiter", ",", "CSV file delimiter, default "
                                "is assumed to be a comma.");
-  params.addParam<RealVectorValue>("const_velocity", "Velocity vector for "
-                                   "advection, overrides the velocity provided "
-                                   "by the datafiles.");
   return params;
 }
 
