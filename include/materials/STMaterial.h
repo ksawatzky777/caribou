@@ -8,9 +8,9 @@ class STMaterial;
 
 /**
  * A generic scalar transport material which provides a velocity profile and
- * diffusion coefficient for scalar transport. Can accept velocity values from
- * a properly formatted series of input csv files or as a constant provided by
- * the InputParameters system.
+ * diffusion coefficient for advection-diffusion. Can accept velocity values
+ * from a properly formatted series of input csv files or as a constant provided
+ * by the InputParameters system.
  */
 
 template <>
