@@ -54,6 +54,9 @@ protected:
   /// Cleans up code.
   bool _const_v;
 
+  /// Number of dimensions in the mesh.
+  unsigned _num_dims;
+
   /// Diffusion coefficient which this material is providing.
   MaterialProperty<Real> & _diffusivity;
 

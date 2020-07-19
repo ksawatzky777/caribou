@@ -1,6 +1,7 @@
 #include "STMaterial.h"
 #include "MooseUtils.h"
 #include "DelimitedFileReader.h"
+#include "MooseMesh.h"
 
 registerMooseObject("caribouApp", STMaterial);
 
@@ -12,65 +13,77 @@ validParams<STMaterial>()
   params.addClassDescription("Generic scalar transport material which provides "
                              "the variables required to implement advection-"
                              "diffusion.");
-  params.addRequiredParam<unsigned>("num_dims", "The number of dimensions "
-                                    "the problem should consider.");
-  params.addRequiredParam<std::string>("dim_file_name", "Name of the file which"
+  params.addRequiredParam<Real>("diffusivity", "Value of the diffusion "
+                                "coefficient, assumed constant across the "
+                                "whole domain.");
+  params.addParam<std::string>("dim_file_name", " ", "Name of the file which"
                                        " contains the x-y-z interpolation "
                                        "points to be used in conjuction with "
                                        "the datafiles for the components of "
                                        "the velocity.");
-  params.addRequiredParam<std::string>("u_file_name", "Name of the file for the"
+  params.addParam<std::string>("u_file_name", " ", "Name of the file for the"
                                        " u component of the velocity.");
-  params.addRequiredParam<std::string>("v_file_name", "Name of the file for the"
+  params.addParam<std::string>("v_file_name", " ", "Name of the file for the"
                                        " v component of the velocity.");
-  params.addParam<std::string>("w_file_name", "Name of the file for the w "
+  params.addParam<std::string>("w_file_name", " ", "Name of the file for the w "
                                "component of the velocity. This parameter is "
                                "necessary for a 3D problem.");
   params.addParam<std::string>("delimiter", ",", "CSV file delimiter, default "
                                "is assumed to be a comma.");
-  params.addRequiredParam<Real>("diffusivity", "Value of the diffusion "
-                                "coefficient, assumed constant across the "
-                                "whole domain.");
   params.addParam<RealVectorValue>("const_velocity", "Velocity vector for "
                                    "advection, overrides the velocity provided "
                                    "by the datafiles.");
-
   return params;
 }
 
 STMaterial::STMaterial(const InputParameters & parameters)
   : Material(parameters),
     _diffusivity(declareProperty<Real>("diffusivity")),
-    _velocity(declareProperty<RealVectorValue>("material_velocity"))
-{
-    std::string _u_file_name = getParam<std::string>("u_file_name");
-    std::string _v_file_name = getParam<std::string>("v_file_name");
-    std::string _dim_file_name = getParam<std::string>("dim_file_name");
-    std::string _delimiter = ",";
+    _velocity(declareProperty<RealVectorValue>("material_velocity")),
+    _num_dims(_mesh.dimension())
 
-    _const_v = parameters.isParamSetByUser("const_velocity");
+{
+  _const_v = parameters.isParamSetByUser("const_velocity");
+
+  std::string _delimiter = ",";
 
   if (parameters.isParamSetByUser("delimiter"))
     _delimiter = getParam<std::string>("delimiter");
 
-  if (_const_v != true)
+  if (_const_v != true && _num_dims == 2)
   {
-    if (getParam<unsigned>("num_dims") == 2)
-        twoDConstruct(_u_file_name, _v_file_name, _dim_file_name, _delimiter);
+    if (parameters.isParamSetByUser("u_file_name")
+        && parameters.isParamSetByUser("v_file_name")
+        && parameters.isParamSetByUser("dim_file_name"))
+    {
+      std::string _u_file_name = getParam<std::string>("u_file_name");
+      std::string _v_file_name = getParam<std::string>("v_file_name");
+      std::string _dim_file_name = getParam<std::string>("dim_file_name");
+      twoDConstruct(_u_file_name, _v_file_name, _dim_file_name, _delimiter);
+    }
+    else
+    {
+      mooseError("Property file names were not provided.");
+    }
   }
 
-  if (_const_v != true)
+  if (_const_v != true && _num_dims == 3)
   {
-    if (getParam<unsigned>("num_dims") == 3
-        && parameters.isParamSetByUser("w_file_name"))
+    if (parameters.isParamSetByUser("u_file_name")
+        && parameters.isParamSetByUser("v_file_name")
+        && parameters.isParamSetByUser("w_file_name")
+        && parameters.isParamSetByUser("dim_file_name"))
     {
-     std::string _w_file_name = getParam<std::string>("w_file_name");
-     threeDConstruct(_u_file_name, _v_file_name, _w_file_name, _dim_file_name,
+      std::string _u_file_name = getParam<std::string>("u_file_name");
+      std::string _v_file_name = getParam<std::string>("v_file_name");
+      std::string _w_file_name = getParam<std::string>("w_file_name");
+      std::string _dim_file_name = getParam<std::string>("dim_file_name");
+      threeDConstruct(_u_file_name, _v_file_name, _w_file_name, _dim_file_name,
                      _delimiter);
     }
     else
     {
-     mooseError("w_file_name was not provided.");
+      mooseError("w_file_name was not provided.");
     }
   }
 }
@@ -185,10 +198,10 @@ STMaterial::computeQpProperties()
 {
   if (_const_v != true)
   {
-    if (getParam<unsigned>("num_dims") == 2)
+    if (_num_dims == 2)
       twoDComputeQpProperties();
 
-    if (getParam<unsigned>("num_dims") == 3)
+    if (_num_dims == 3)
       threeDComputeQpProperties();
   }
   else
