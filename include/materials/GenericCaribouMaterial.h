@@ -6,7 +6,7 @@ class GenericCaribouMaterial;
 
 /**
  * The material which provides all the constants and parameters required for
- * CARIBOU's atmospheric dispersion model.
+ * the kernels used by CARIBOU's atmospheric dispersion model.
  */
 
 template <>
