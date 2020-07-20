@@ -52,7 +52,7 @@
 []
 
 [BCs]
-  [./box]
+  [./open]
     type = MaterialOutflowBC
     variable = concentration
     boundary = '0 2 3 4 5'
