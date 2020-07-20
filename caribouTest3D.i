@@ -52,17 +52,16 @@
 []
 
 [BCs]
-  [./left]
-    type = OutflowBC
+  [./box]
+    type = MaterialOutflowBC
     variable = concentration
-    boundary = '0'
-    velocity = '-10.0 0.0 1.0'
+    boundary = '0 2 3 4 5'
   [../]
-  [./top]
-    type = OutflowBC
+  [./bott]
+    type = DryDepositionBC
     variable = concentration
-    boundary = '4'
-    velocity = '-10.0 0.0 1.0'
+    boundary = '1'
+    dry_deposition_velocity = 1.0
   [../]
 []
 
@@ -74,7 +73,6 @@
     w_file_name = w.csv
     dim_file_name = coords.csv
     diffusivity = 1.0
-    #const_velocity = '-10.0 0.0 1.0'
   [../]
 []
 
