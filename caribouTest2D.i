@@ -67,7 +67,7 @@
     w_file_name = w.csv
     dim_file_name = coords.csv
     diffusivity = 1.0
-    #const_velocity = '-10.0 0.0 0.0'
+    const_velocity = '-10.0 0.0 0.0'
   [../]
 []
 
