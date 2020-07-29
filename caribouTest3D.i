@@ -1,9 +1,9 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx = 100
-  ny = 100
-  nz = 100
+  nx = 50
+  ny = 50
+  nz = 50
   xmin = 0.0
   xmax = 1550.0
   ymin = 0.0
@@ -79,7 +79,7 @@
 [Executioner]
   type = Transient
   solve_type = 'PJFNK'
-  num_steps = 100
+  num_steps = 10
   dt = 1
 []
 
