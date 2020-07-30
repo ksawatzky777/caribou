@@ -77,8 +77,12 @@ protected:
   /// Number of dimensions in the mesh.
   unsigned _num_dims;
 
-  /// Current index entry of the current and previous data time steps.
+  /// Current index entry of the provided velocity field and a temporary index
+  /// value for the next velocity field. Temporary index value is written to the
+  /// current index value if they are different (current simulation time is
+  /// ahead of the velocity field).
   unsigned _t_index;
+  unsigned _temp_t_index;
 
   /// Vector of values for the data time axis.
   std::vector<Real> _time_axis;

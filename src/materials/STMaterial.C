@@ -55,6 +55,7 @@ STMaterial::STMaterial(const InputParameters & parameters)
 
   /// Initialize the time index to 0.
   _t_index = 0;
+  _temp_t_index = 0;
 
   /// Logic to initialize the interpolator objects.
   if (_const_v != true && _num_dims == 2)
@@ -114,7 +115,7 @@ STMaterial::computeTimeIndex()
   for (unsigned i = _t_index; i < _time_axis.size() - 1; i++)
   {
     if (_t >= _time_axis[i] && _t < _time_axis[i + 1])
-      _t_index = i;
+      _temp_t_index = i;
       break;
   }
 }
@@ -216,12 +217,18 @@ STMaterial::threeDConstruct(std::string & _u_file_name,
 void
 STMaterial::twoDComputeQpProperties()
 {
-  /// Updates the interpolator object every change in data time step.
+  /// Updates the interpolator object if the simulation time is within a
+  /// different region bounded by the time axis. This changes the velocity
+  /// field provided by this material.
   if (_is_transient && _velocity_time_dependant)
   {
     computeTimeIndex();
-    twoDConstruct(_u_file_name, _v_file_name, _dim_file_name, _delimiter,
-                  _t_index);
+    if (_temp_t_index != _t_index)
+    {
+      _t_index = _temp_t_index;
+      twoDConstruct(_u_file_name, _v_file_name, _dim_file_name, _delimiter,
+                    _t_index);
+    }
   }
 
   /// Compute properties.
@@ -235,12 +242,20 @@ STMaterial::twoDComputeQpProperties()
 void
 STMaterial::threeDComputeQpProperties()
 {
-  /// Updates the interpolator object if the
+  /// Updates the interpolator object if the simulation time is within a
+  /// different region bounded by the time axis. This updates the velocity
+  /// field provided by this material for the next time step. Otherwise,
+  /// computes the velocity field using the trilinear interpolator objects
+  /// without updating them.
   if (_is_transient && _velocity_time_dependant)
   {
     computeTimeIndex();
-    threeDConstruct(_u_file_name, _v_file_name, _w_file_name, _dim_file_name,
-                    _delimiter, _t_index);
+    if (_temp_t_index != _t_index)
+    {
+      _t_index = _temp_t_index;
+      threeDConstruct(_u_file_name, _v_file_name, _w_file_name, _dim_file_name,
+                      _delimiter, _t_index);
+    }
   }
   _diffusivity[_qp] = getParam<Real>("diffusivity");
 
