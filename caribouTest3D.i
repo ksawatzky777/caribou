@@ -73,6 +73,8 @@
     w_file_name = w.csv
     dim_file_name = coords.csv
     diffusivity = 1.0
+    time_dependance = true
+    outputs = exodus
   [../]
 []
 
