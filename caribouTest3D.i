@@ -81,7 +81,7 @@
 [Executioner]
   type = Transient
   solve_type = 'PJFNK'
-  num_steps = 10
+  num_steps = 100
   dt = 1
 []
 
