@@ -25,32 +25,28 @@ protected:
 
   /// Method to initialize 2D trilinear interpolators to interpolate velocity
   /// components from the given csv files.
-  void twoDConstruct(std::string & _u_file_name,
-                     std::string & _v_file_name,
-                     std::string & _dim_file_name,
-                     std::string & _delimiter,
-                     unsigned _t_index);
+  void twoDConstruct();
 
   /// Method to initialize 3D trilinear interpolators to interpolate velocity
   /// components from the given csv files.
-  void threeDConstruct(std::string & _u_file_name,
-                       std::string & _v_file_name,
-                       std::string & _w_file_name,
-                       std::string & _dim_file_name,
-                       std::string & _delimiter,
-                       unsigned _t_index);
+  void threeDConstruct();
   /// Method to compute the time index of the data relative to the current
   /// simulation time.
   void computeTimeIndex();
 
+  /// Methods to update the interpolator objects when the velocity field is time
+  /// dependant. This is computationally taxing and should be replaced
+  /// with a quadrilinear interpolation scheme in the future.
+  void twoDUpdate();
+  void threeDUpdate();
+
   /// Method to remove irrelevent datapoints from the data read from the csv
-  /// files. Searches for a zero followed by a second zero. It that removes
-  /// everything from the 2nd zero to the end of the vector.
+  /// files.
   void cleanAxisData(std::vector<Real> & _array_to_clean);
 
   /// Main property compute method. Calls either twoDComputeQpProperties or
   /// threeDComputeQpProperties depending on the number of dimensions.
-  virtual void computeQpProperties();
+  virtual void computeQpProperties() override;
 
   /// Property compute method for 2D.
   virtual void twoDComputeQpProperties();
@@ -66,6 +62,14 @@ protected:
   std::string _dim_file_name;
   std::string _delimiter;
 
+  /// Vectors of values for the data axis.
+  std::vector<std::vector<Real>> _dimensions;
+
+  ///Vectors of values for the data.
+  std::vector<std::vector<Real>> _u_data;
+  std::vector<std::vector<Real>> _v_data;
+  std::vector<std::vector<Real>> _w_data;
+
   /// Vectors of interpolator objects to interpolate data.
   std::vector<TrilinearInterpolation> _2_d_interp;
   std::vector<TrilinearInterpolation> _3_d_interp;
@@ -77,15 +81,14 @@ protected:
   /// Number of dimensions in the mesh.
   unsigned _num_dims;
 
-  /// Current index entry of the provided velocity field and a temporary index
-  /// value for the next velocity field. Temporary index value is written to the
-  /// current index value if they are different (current simulation time is
-  /// ahead of the velocity field).
+  /// Current index entry of the time dependant velocity field and the previous
+  /// index entry.
   unsigned _t_index;
-  unsigned _temp_t_index;
+  unsigned _previous_t_index;
 
-  /// Vector of values for the data time axis.
-  std::vector<Real> _time_axis;
+  /// Old simulation time. Used to detect if the simulation has advanced in a
+  /// time step.
+  Real _old_time;
 
   /// Diffusion coefficient which this material is providing.
   MaterialProperty<Real> & _diffusivity;

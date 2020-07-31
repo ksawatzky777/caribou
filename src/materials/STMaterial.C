@@ -53,9 +53,10 @@ STMaterial::STMaterial(const InputParameters & parameters)
 {
   _const_v = parameters.isParamSetByUser("const_velocity");
 
-  /// Initialize the time index to 0.
+  /// Initialize the time index to 0 and old time to the initial sim time.
   _t_index = 0;
-  _temp_t_index = 0;
+  _previous_t_index = 0;
+  _old_time = _t;
 
   /// Logic to initialize the interpolator objects.
   if (_const_v != true && _num_dims == 2)
@@ -65,8 +66,7 @@ STMaterial::STMaterial(const InputParameters & parameters)
         && parameters.isParamSetByUser("dim_file_name"))
     {
       /// 2D interpolator initialization.
-      twoDConstruct(_u_file_name, _v_file_name, _dim_file_name, _delimiter,
-                    _t_index);
+      twoDConstruct();
     }
     else
     {
@@ -82,8 +82,7 @@ STMaterial::STMaterial(const InputParameters & parameters)
         && parameters.isParamSetByUser("dim_file_name"))
     {
       /// 3D interpolator initialization.
-      threeDConstruct(_u_file_name, _v_file_name, _w_file_name, _dim_file_name,
-                     _delimiter, _t_index);
+      threeDConstruct();
     }
     else
     {
@@ -95,139 +94,236 @@ STMaterial::STMaterial(const InputParameters & parameters)
 void
 STMaterial::cleanAxisData(std::vector<Real> & _array_to_clean)
 {
-  unsigned _first_to_remove = 0;
-  for (unsigned i = 1; i < _array_to_clean.size(); i++)
+  if (_array_to_clean.size() != 1)
   {
-    if (_array_to_clean[i] ==  0.0 && _array_to_clean[i - 1] != 0.0)
-      _first_to_remove = i;
-      break;
+    unsigned _first_to_remove = 0;
+    for (unsigned i = 1; i < _array_to_clean.size(); i++)
+  {
+      if (_array_to_clean[i] ==  0.0 && _array_to_clean[i - 1] != 0.0)
+        _first_to_remove = i;
+        break;
   }
-  if (_first_to_remove != 0)
-    _array_to_clean.erase(_array_to_clean.begin() + _first_to_remove,
-                          _array_to_clean.end());
-  if (_array_to_clean[0] == 0.0 && _array_to_clean[1] == 0.0)
-    _array_to_clean.erase(_array_to_clean.begin() + 1, _array_to_clean.end());
+    if (_first_to_remove != 0)
+      _array_to_clean.erase(_array_to_clean.begin() + _first_to_remove,
+                            _array_to_clean.end());
+    if (_array_to_clean[0] == 0.0 && _array_to_clean[1] == 0.0)
+      _array_to_clean.erase(_array_to_clean.begin() + 1, _array_to_clean.end());
+  }
 }
 
+/// NEEDS TO BE SAFER
 void
 STMaterial::computeTimeIndex()
 {
-  for (unsigned i = _t_index; i < _time_axis.size() - 1; i++)
+  /// Check all elements except the last.
+  for (unsigned i = 0; i < _dimensions[3].size() - 1; i++)
   {
-    if (_t >= _time_axis[i] && _t < _time_axis[i + 1])
-      _temp_t_index = i;
+    if (_t >= _dimensions[3][i] && _t < _dimensions[3][i + 1])
+    {
+      _t_index = i;
       break;
+    }
   }
+  /// Checks the last element.
+  if (_t >= _dimensions[3][_dimensions[3].size() - 1])
+    _t_index = _dimensions[3].size() - 1;
 }
 
 void
-STMaterial::twoDConstruct(std::string & _u_file_name,
-                          std::string & _v_file_name,
-                          std::string & _dim_file_name,
-                          std::string & _delimiter,
-                          unsigned _t_index)
+STMaterial::twoDConstruct()
 {
+  /// Declare file reader objects.
   MooseUtils::DelimitedFileReader _u_reader(_u_file_name);
   MooseUtils::DelimitedFileReader _v_reader(_v_file_name);
   MooseUtils::DelimitedFileReader _dim_reader(_dim_file_name);
 
+  /// Set the delimiter.
   _u_reader.setDelimiter(_delimiter);
   _v_reader.setDelimiter(_delimiter);
   _dim_reader.setDelimiter(_delimiter);
 
+  /// Read the data.
   _u_reader.read();
   _v_reader.read();
   _dim_reader.read();
 
+  /// Fetch data names.
   const std::vector<std::string> _u_data_names = _u_reader.getNames();
   const std::vector<std::string> _v_data_names = _v_reader.getNames();
   const std::vector<std::string> _coord_names = _dim_reader.getNames();
 
-  std::vector<Real> _temp_z_coords;
-  _temp_z_coords.push_back(0.0);
+  /// Zero vector for dimensions which don't exist in the scope of the problem.
+  std::vector<Real> _zero_vector;
+  _zero_vector.push_back(0.0);
 
+  /// Read dimensions from the dim file.
   if (_is_transient && _velocity_time_dependant)
   {
-    _time_axis = _dim_reader.getData(_coord_names[2]);
-    cleanAxisData(_time_axis);
+    _dimensions.push_back(_dim_reader.getData(_coord_names[0]));
+    _dimensions.push_back(_dim_reader.getData(_coord_names[1]));
+    _dimensions.push_back(_zero_vector);
+    _dimensions.push_back(_dim_reader.getData(_coord_names[2]));
+    cleanAxisData(_dimensions[3]);
+  }
+  else
+  {
+    _dimensions.push_back(_dim_reader.getData(_coord_names[0]));
+    _dimensions.push_back(_dim_reader.getData(_coord_names[1]));
+    _dimensions.push_back(_zero_vector);
+    _dimensions.push_back(_zero_vector);
   }
 
-  std::vector<Real> _x_axis = _dim_reader.getData(_coord_names[0]);
-  std::vector<Real> _y_axis = _dim_reader.getData(_coord_names[1]);
+  /// Clean the dimensions (remove unnecessary zeros).
+  cleanAxisData(_dimensions[0]);
+  cleanAxisData(_dimensions[1]);
 
-  cleanAxisData(_x_axis);
-  cleanAxisData(_y_axis);
+  /// Read weather data from files.
+  for (unsigned i = 0; i < _dimensions[3].size(); i++)
+  {
+    _u_data.push_back(_u_reader.getData(_u_data_names[i]));
+    _v_data.push_back(_v_reader.getData(_v_data_names[i]));
+  }
 
-  _2_d_interp.push_back(TrilinearInterpolation(_x_axis, _y_axis, _temp_z_coords,
-                                   _u_reader.getData(_u_data_names[_t_index])));
-  _2_d_interp.push_back(TrilinearInterpolation(_x_axis, _y_axis, _temp_z_coords,
-                                   _v_reader.getData(_v_data_names[_t_index])));
+  /// Initialize interpolator vectors.
+  _2_d_interp.push_back(TrilinearInterpolation(_dimensions[0],
+                                               _dimensions[1],
+                                               _dimensions[2],
+                                               _u_data[_t_index]));
+  _2_d_interp.push_back(TrilinearInterpolation(_dimensions[0],
+                                               _dimensions[1],
+                                               _dimensions[2],
+                                               _v_data[_t_index]));
 }
 
 void
-STMaterial::threeDConstruct(std::string & _u_file_name,
-                            std::string & _v_file_name,
-                            std::string & _w_file_name,
-                            std::string & _dim_file_name,
-                            std::string & _delimiter,
-                            unsigned _t_index)
+STMaterial::threeDConstruct()
 {
+  /// Declare file reader objects.
   MooseUtils::DelimitedFileReader _u_reader(_u_file_name);
   MooseUtils::DelimitedFileReader _v_reader(_v_file_name);
   MooseUtils::DelimitedFileReader _w_reader(_w_file_name);
   MooseUtils::DelimitedFileReader _dim_reader(_dim_file_name);
 
+  /// Set the delimiter.
   _u_reader.setDelimiter(_delimiter);
   _v_reader.setDelimiter(_delimiter);
   _w_reader.setDelimiter(_delimiter);
   _dim_reader.setDelimiter(_delimiter);
 
+  /// Read the data.
   _u_reader.read();
   _v_reader.read();
   _w_reader.read();
   _dim_reader.read();
 
+  /// Fetch data names.
   const std::vector<std::string> & _u_data_names = _u_reader.getNames();
   const std::vector<std::string> & _v_data_names = _v_reader.getNames();
   const std::vector<std::string> & _w_data_names = _w_reader.getNames();
   const std::vector<std::string> _coord_names = _dim_reader.getNames();
 
+  /// Read dimensions from the dim file.
   if (_is_transient && _velocity_time_dependant)
   {
-    _time_axis = _dim_reader.getData(_coord_names[2]);
-    cleanAxisData(_time_axis);
+    _dimensions.push_back(_dim_reader.getData(_coord_names[0]));
+    _dimensions.push_back(_dim_reader.getData(_coord_names[1]));
+    _dimensions.push_back(_dim_reader.getData(_coord_names[2]));
+    _dimensions.push_back(_dim_reader.getData(_coord_names[3]));
+    cleanAxisData(_dimensions[3]);
+  }
+  else
+  {
+    std::vector<Real> _zero_vector;
+    _zero_vector.push_back(0.0);
+
+    _dimensions.push_back(_dim_reader.getData(_coord_names[0]));
+    _dimensions.push_back(_dim_reader.getData(_coord_names[1]));
+    _dimensions.push_back(_dim_reader.getData(_coord_names[2]));
+    _dimensions.push_back(_zero_vector);
   }
 
-  std::vector<Real> _x_axis = _dim_reader.getData(_coord_names[0]);
-  std::vector<Real> _y_axis = _dim_reader.getData(_coord_names[1]);
-  std::vector<Real> _z_axis = _dim_reader.getData(_coord_names[2]);
+  /// Clean the dimensions (remove unnecessary zeros).
+  cleanAxisData(_dimensions[0]);
+  cleanAxisData(_dimensions[1]);
+  cleanAxisData(_dimensions[2]);
 
-  cleanAxisData(_x_axis);
-  cleanAxisData(_y_axis);
-  cleanAxisData(_z_axis);
+  /// Read weather data from files.
+  for (unsigned i = 0; i < _dimensions[3].size(); i++)
+  {
+    _u_data.push_back(_u_reader.getData(_u_data_names[i]));
+    _v_data.push_back(_v_reader.getData(_v_data_names[i]));
+    _w_data.push_back(_w_reader.getData(_w_data_names[i]));
+  }
 
-  _3_d_interp.push_back(TrilinearInterpolation(_x_axis, _y_axis, _z_axis,
-                                   _u_reader.getData(_u_data_names[_t_index])));
-  _3_d_interp.push_back(TrilinearInterpolation(_x_axis, _y_axis, _z_axis,
-                                   _v_reader.getData(_v_data_names[_t_index])));
-  _3_d_interp.push_back(TrilinearInterpolation(_x_axis, _y_axis, _z_axis,
-                                   _w_reader.getData(_w_data_names[_t_index])));
+  /// Initialize interpolator vectors.
+  _3_d_interp.push_back(TrilinearInterpolation(_dimensions[0],
+                                               _dimensions[1],
+                                               _dimensions[2],
+                                               _u_data[_t_index]));
+  _3_d_interp.push_back(TrilinearInterpolation(_dimensions[0],
+                                               _dimensions[1],
+                                               _dimensions[2],
+                                               _v_data[_t_index]));
+  _3_d_interp.push_back(TrilinearInterpolation(_dimensions[0],
+                                               _dimensions[1],
+                                               _dimensions[2],
+                                               _w_data[_t_index]));
+}
+
+void
+STMaterial::twoDUpdate()
+{
+  /// Clear interpolator objects.
+  _2_d_interp.clear();
+
+  /// Re-initialize the interpolator object to use data from the current
+  /// velocity field time-step.
+  _2_d_interp.push_back(TrilinearInterpolation(_dimensions[0],
+                                               _dimensions[1],
+                                               _dimensions[2],
+                                               _u_data[_t_index]));
+  _2_d_interp.push_back(TrilinearInterpolation(_dimensions[0],
+                                               _dimensions[1],
+                                               _dimensions[2],
+                                               _v_data[_t_index]));
+}
+
+void
+STMaterial::threeDUpdate()
+{
+  /// Clear interpolator objects.
+  _3_d_interp.clear();
+
+  /// Re-initialize the interpolator object to use data from the current
+  /// velocity field time-step.
+  _3_d_interp.push_back(TrilinearInterpolation(_dimensions[0],
+                                               _dimensions[1],
+                                               _dimensions[2],
+                                               _u_data[_t_index]));
+  _3_d_interp.push_back(TrilinearInterpolation(_dimensions[0],
+                                               _dimensions[1],
+                                               _dimensions[2],
+                                               _v_data[_t_index]));
+  _3_d_interp.push_back(TrilinearInterpolation(_dimensions[0],
+                                               _dimensions[1],
+                                               _dimensions[2],
+                                               _w_data[_t_index]));
 }
 
 void
 STMaterial::twoDComputeQpProperties()
 {
-  /// Updates the interpolator object if the simulation time is within a
-  /// different region bounded by the time axis. This changes the velocity
-  /// field provided by this material.
   if (_is_transient && _velocity_time_dependant)
   {
-    computeTimeIndex();
-    if (_temp_t_index != _t_index)
+    if (_t != _old_time)
     {
-      _t_index = _temp_t_index;
-      twoDConstruct(_u_file_name, _v_file_name, _dim_file_name, _delimiter,
-                    _t_index);
+      _old_time = _t;
+      computeTimeIndex();
+      if (_t_index != _previous_t_index)
+      {
+        _previous_t_index = _t_index;
+        twoDUpdate();
+      }
     }
   }
 
@@ -242,21 +338,21 @@ STMaterial::twoDComputeQpProperties()
 void
 STMaterial::threeDComputeQpProperties()
 {
-  /// Updates the interpolator object if the simulation time is within a
-  /// different region bounded by the time axis. This updates the velocity
-  /// field provided by this material for the next time step. Otherwise,
-  /// computes the velocity field using the trilinear interpolator objects
-  /// without updating them.
   if (_is_transient && _velocity_time_dependant)
   {
-    computeTimeIndex();
-    if (_temp_t_index != _t_index)
+    if (_t != _old_time)
     {
-      _t_index = _temp_t_index;
-      threeDConstruct(_u_file_name, _v_file_name, _w_file_name, _dim_file_name,
-                      _delimiter, _t_index);
+      _old_time = _t;
+      computeTimeIndex();
+      if (_t_index != _previous_t_index)
+      {
+        _previous_t_index = _t_index;
+        threeDUpdate();
+      }
     }
   }
+
+  /// Compute properties.
   _diffusivity[_qp] = getParam<Real>("diffusivity");
 
   _velocity[_qp] = {_3_d_interp[0].sample(_q_point[_qp](0), _q_point[_qp](1),
