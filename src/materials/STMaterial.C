@@ -44,14 +44,11 @@ STMaterial::STMaterial(const InputParameters & parameters)
     _diffusivity(declareProperty<Real>("diffusivity")),
     _velocity(declareProperty<RealVectorValue>("material_velocity")),
     _num_dims(_mesh.dimension()),
-    _velocity_time_dependant(getParam<bool>("time_dependance")),
-    _dim_file_name(getParam<std::string>("dim_file_name")),
-    _u_file_name(getParam<std::string>("u_file_name")),
-    _v_file_name(getParam<std::string>("v_file_name")),
-    _w_file_name(getParam<std::string>("w_file_name")),
-    _delimiter(getParam<std::string>("delimiter"))
+    _velocity_time_dependant(getParam<bool>("time_dependance"))
 {
   _const_v = parameters.isParamSetByUser("const_velocity");
+  std::string _delimiter = getParam<std::string>("delimiter");
+  std::vector<std::string> _file_names;
 
   /// Initialize the time index to 0 and old time to the initial sim time.
   _t_index = 0;
@@ -65,8 +62,13 @@ STMaterial::STMaterial(const InputParameters & parameters)
         && parameters.isParamSetByUser("v_file_name")
         && parameters.isParamSetByUser("dim_file_name"))
     {
+      /// Fetch file names.
+      _file_names.push_back(getParam<std::string>("u_file_name"));
+      _file_names.push_back(getParam<std::string>("v_file_name"));
+      _file_names.push_back(getParam<std::string>("dim_file_name"));
+
       /// 2D interpolator initialization.
-      twoDConstruct();
+      twoDConstruct(_delimiter, _file_names);
     }
     else
     {
@@ -81,8 +83,14 @@ STMaterial::STMaterial(const InputParameters & parameters)
         && parameters.isParamSetByUser("w_file_name")
         && parameters.isParamSetByUser("dim_file_name"))
     {
+      /// Fetch file names.
+      _file_names.push_back(getParam<std::string>("u_file_name"));
+      _file_names.push_back(getParam<std::string>("v_file_name"));
+      _file_names.push_back(getParam<std::string>("w_file_name"));
+      _file_names.push_back(getParam<std::string>("dim_file_name"));
+
       /// 3D interpolator initialization.
-      threeDConstruct();
+      threeDConstruct(_delimiter, _file_names);
     }
     else
     {
@@ -111,7 +119,7 @@ STMaterial::cleanAxisData(std::vector<Real> & _array_to_clean)
   }
 }
 
-/// NEEDS TO BE SAFER
+/// Slow for large data files.
 void
 STMaterial::computeTimeIndex()
 {
@@ -130,27 +138,22 @@ STMaterial::computeTimeIndex()
 }
 
 void
-STMaterial::twoDConstruct()
+STMaterial::twoDConstruct(std::string & _delimiter,
+                          std::vector<std::string> & _file_names)
 {
-  /// Declare file reader objects.
-  MooseUtils::DelimitedFileReader _u_reader(_u_file_name);
-  MooseUtils::DelimitedFileReader _v_reader(_v_file_name);
-  MooseUtils::DelimitedFileReader _dim_reader(_dim_file_name);
+  std::vector<MooseUtils::DelimitedFileReader> _reader;
+  std::vector<std::vector<std::string>> _data_names;
 
-  /// Set the delimiter.
-  _u_reader.setDelimiter(_delimiter);
-  _v_reader.setDelimiter(_delimiter);
-  _dim_reader.setDelimiter(_delimiter);
+  for (unsigned i = 0; i < _file_names.size(); i++)
+  {
+    _reader.push_back(MooseUtils::DelimitedFileReader(_file_names[i]));
 
-  /// Read the data.
-  _u_reader.read();
-  _v_reader.read();
-  _dim_reader.read();
+    _reader[i].setDelimiter(_delimiter);
 
-  /// Fetch data names.
-  const std::vector<std::string> _u_data_names = _u_reader.getNames();
-  const std::vector<std::string> _v_data_names = _v_reader.getNames();
-  const std::vector<std::string> _coord_names = _dim_reader.getNames();
+    _reader[i].read();
+
+    _data_names.push_back(_reader[i].getNames());
+  }
 
   /// Zero vector for dimensions which don't exist in the scope of the problem.
   std::vector<Real> _zero_vector;
@@ -159,16 +162,16 @@ STMaterial::twoDConstruct()
   /// Read dimensions from the dim file.
   if (_is_transient && _velocity_time_dependant)
   {
-    _dimensions.push_back(_dim_reader.getData(_coord_names[0]));
-    _dimensions.push_back(_dim_reader.getData(_coord_names[1]));
+    _dimensions.push_back(_reader[2].getData(_data_names[2][0]));
+    _dimensions.push_back(_reader[2].getData(_data_names[2][1]));
     _dimensions.push_back(_zero_vector);
-    _dimensions.push_back(_dim_reader.getData(_coord_names[2]));
+    _dimensions.push_back(_reader[2].getData(_data_names[2][2]));
     cleanAxisData(_dimensions[3]);
   }
   else
   {
-    _dimensions.push_back(_dim_reader.getData(_coord_names[0]));
-    _dimensions.push_back(_dim_reader.getData(_coord_names[1]));
+    _dimensions.push_back(_reader[2].getData(_data_names[2][0]));
+    _dimensions.push_back(_reader[2].getData(_data_names[2][1]));
     _dimensions.push_back(_zero_vector);
     _dimensions.push_back(_zero_vector);
   }
@@ -180,8 +183,8 @@ STMaterial::twoDConstruct()
   /// Read weather data from files.
   for (unsigned i = 0; i < _dimensions[3].size(); i++)
   {
-    _u_data.push_back(_u_reader.getData(_u_data_names[i]));
-    _v_data.push_back(_v_reader.getData(_v_data_names[i]));
+    _u_data.push_back(_reader[0].getData(_data_names[0][i]));
+    _v_data.push_back(_reader[1].getData(_data_names[1][i]));
   }
 
   /// Initialize interpolator vectors.
@@ -196,39 +199,30 @@ STMaterial::twoDConstruct()
 }
 
 void
-STMaterial::threeDConstruct()
+STMaterial::threeDConstruct(std::string & _delimiter,
+                            std::vector<std::string> & _file_names)
 {
-  /// Declare file reader objects.
-  MooseUtils::DelimitedFileReader _u_reader(_u_file_name);
-  MooseUtils::DelimitedFileReader _v_reader(_v_file_name);
-  MooseUtils::DelimitedFileReader _w_reader(_w_file_name);
-  MooseUtils::DelimitedFileReader _dim_reader(_dim_file_name);
+  std::vector<MooseUtils::DelimitedFileReader> _reader;
+  std::vector<std::vector<std::string>> _data_names;
 
-  /// Set the delimiter.
-  _u_reader.setDelimiter(_delimiter);
-  _v_reader.setDelimiter(_delimiter);
-  _w_reader.setDelimiter(_delimiter);
-  _dim_reader.setDelimiter(_delimiter);
+  for (unsigned i = 0; i < _file_names.size(); i++)
+  {
+    _reader.push_back(MooseUtils::DelimitedFileReader(_file_names[i]));
 
-  /// Read the data.
-  _u_reader.read();
-  _v_reader.read();
-  _w_reader.read();
-  _dim_reader.read();
+    _reader[i].setDelimiter(_delimiter);
 
-  /// Fetch data names.
-  const std::vector<std::string> & _u_data_names = _u_reader.getNames();
-  const std::vector<std::string> & _v_data_names = _v_reader.getNames();
-  const std::vector<std::string> & _w_data_names = _w_reader.getNames();
-  const std::vector<std::string> _coord_names = _dim_reader.getNames();
+    _reader[i].read();
+
+    _data_names.push_back(_reader[i].getNames());
+  }
 
   /// Read dimensions from the dim file.
   if (_is_transient && _velocity_time_dependant)
   {
-    _dimensions.push_back(_dim_reader.getData(_coord_names[0]));
-    _dimensions.push_back(_dim_reader.getData(_coord_names[1]));
-    _dimensions.push_back(_dim_reader.getData(_coord_names[2]));
-    _dimensions.push_back(_dim_reader.getData(_coord_names[3]));
+    _dimensions.push_back(_reader[3].getData(_data_names[3][0]));
+    _dimensions.push_back(_reader[3].getData(_data_names[3][1]));
+    _dimensions.push_back(_reader[3].getData(_data_names[3][2]));
+    _dimensions.push_back(_reader[3].getData(_data_names[3][3]));
     cleanAxisData(_dimensions[3]);
   }
   else
@@ -236,9 +230,9 @@ STMaterial::threeDConstruct()
     std::vector<Real> _zero_vector;
     _zero_vector.push_back(0.0);
 
-    _dimensions.push_back(_dim_reader.getData(_coord_names[0]));
-    _dimensions.push_back(_dim_reader.getData(_coord_names[1]));
-    _dimensions.push_back(_dim_reader.getData(_coord_names[2]));
+    _dimensions.push_back(_reader[3].getData(_data_names[3][0]));
+    _dimensions.push_back(_reader[3].getData(_data_names[3][1]));
+    _dimensions.push_back(_reader[3].getData(_data_names[3][2]));
     _dimensions.push_back(_zero_vector);
   }
 
@@ -250,9 +244,9 @@ STMaterial::threeDConstruct()
   /// Read weather data from files.
   for (unsigned i = 0; i < _dimensions[3].size(); i++)
   {
-    _u_data.push_back(_u_reader.getData(_u_data_names[i]));
-    _v_data.push_back(_v_reader.getData(_v_data_names[i]));
-    _w_data.push_back(_w_reader.getData(_w_data_names[i]));
+    _u_data.push_back(_reader[0].getData(_data_names[0][i]));
+    _v_data.push_back(_reader[1].getData(_data_names[1][i]));
+    _w_data.push_back(_reader[2].getData(_data_names[2][i]));
   }
 
   /// Initialize interpolator vectors.

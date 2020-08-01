@@ -25,11 +25,13 @@ protected:
 
   /// Method to initialize 2D trilinear interpolators to interpolate velocity
   /// components from the given csv files.
-  void twoDConstruct();
+  void twoDConstruct(std::string & _delimiter,
+                     std::vector<std::string> & _file_names);
 
   /// Method to initialize 3D trilinear interpolators to interpolate velocity
   /// components from the given csv files.
-  void threeDConstruct();
+  void threeDConstruct(std::string & _delimiter,
+                       std::vector<std::string> & _file_names);
   /// Method to compute the time index of the data relative to the current
   /// simulation time.
   void computeTimeIndex();
@@ -53,14 +55,6 @@ protected:
 
   /// Property compute method for 3D.
   virtual void threeDComputeQpProperties();
-
-  /// Variables to hold file names. Should probably clean this up and use a map
-  /// instead.
-  std::string _u_file_name;
-  std::string _v_file_name;
-  std::string _w_file_name;
-  std::string _dim_file_name;
-  std::string _delimiter;
 
   /// Vectors of values for the data axis.
   std::vector<std::vector<Real>> _dimensions;
