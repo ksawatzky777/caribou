@@ -12,7 +12,7 @@ import barometric_utils as bu
 import csv
 
 def convert_by_latlong(file, point1, point2, p_level,
-                       times, deltas=[31, 31]):
+                       times, deltas=[31000.0, 31000.0]):
     """
     This function extracts long-lat data within a bounded region defined by
     the input parameters. It than converts the long/lat coordinates to an

@@ -102,18 +102,22 @@ STMaterial::STMaterial(const InputParameters & parameters)
 void
 STMaterial::cleanAxisData(std::vector<Real> & _array_to_clean)
 {
-  if (_array_to_clean.size() != 1)
+  if (_array_to_clean.size() > 1)
   {
     unsigned _first_to_remove = 0;
     for (unsigned i = 1; i < _array_to_clean.size(); i++)
-  {
+    {
       if (_array_to_clean[i] ==  0.0 && _array_to_clean[i - 1] != 0.0)
+      {
         _first_to_remove = i;
         break;
-  }
+      }
+    }
     if (_first_to_remove != 0)
+    {
       _array_to_clean.erase(_array_to_clean.begin() + _first_to_remove,
                             _array_to_clean.end());
+    }
     if (_array_to_clean[0] == 0.0 && _array_to_clean[1] == 0.0)
       _array_to_clean.erase(_array_to_clean.begin() + 1, _array_to_clean.end());
   }
