@@ -208,8 +208,8 @@ def convert_by_latlong(file, point1, point2, p_level,
 
     #Loop over each time index other than the first.
     for t in range(len(times) - 1):
-        print ('Extracting data at ' + str(times[t]) +
-               ' (time ' + str(t) + ').')
+        print ('Extracting data at ' + str(times[t + 1]) +
+               ' (time ' + str(t + 1) + ').')
 
         data_size = np.shape(grid_x)[0]*np.shape(grid_y)[0]*np.shape(grid_z)[0]
         u = np.zeros(data_size)
@@ -233,7 +233,8 @@ def convert_by_latlong(file, point1, point2, p_level,
                     u[counter] = temp_u[x,y]
                     counter += 1
 
-        print ('U completed at ' + str(times[t]) + ' (time ' + str(t) + ').')
+        print ('U completed at ' + str(times[t + 1]) +
+               ' (time ' + str(t + 1) + ').')
         counter = 0
 
         #Loop over the data for v.
@@ -251,7 +252,8 @@ def convert_by_latlong(file, point1, point2, p_level,
                     v[counter] = temp_v[x,y]
                     counter += 1
 
-        print ('V completed at ' + str(times[t]) + ' (time ' + str(t) + ').')
+        print ('V completed at ' + str(times[t + 1]) +
+               ' (time ' + str(t + 1) + ').')
         counter = 0
 
         #Loop over the data for w.
@@ -269,7 +271,8 @@ def convert_by_latlong(file, point1, point2, p_level,
                     w[counter] = bu.vert_to_w(temp_w[x,y])
                     counter += 1
 
-        print ('W completed at ' + str(times[t]) + ' (time ' + str(t) + ').')
+        print ('w completed at ' + str(times[t + 1]) +
+               ' (time ' + str(t + 1) + ').')
 
         t_df_u = pd.DataFrame(u, columns=['u' + str(t)])
         t_df_v = pd.DataFrame(v, columns=['v' + str(t)])
