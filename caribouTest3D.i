@@ -5,11 +5,11 @@
   ny = 50
   nz = 50
   xmin = 0.0
-  xmax = 1550.0
+  xmax = 124000.0
   ymin = 0.0
-  ymax = 1550.0
+  ymax = 124000.0
   zmin = 0.0
-  zmax = 1550.0
+  zmax = 11539.0
 []
 
 [Variables]
@@ -47,7 +47,7 @@
     variable = concentration
     type = TimedPointSource
     rate = 100.0
-    point = '775.0 775.0 0.0'
+    point = '62000.0 62000.0 0.0'
     deactivation_time = 50.0
   [../]
 []
@@ -74,7 +74,7 @@
     w_file_name = w.csv
     dim_file_name = coords.csv
     diffusivity = 1.0
-    time_dependance = true
+    #time_dependance = true
     outputs = exodus
   [../]
 []

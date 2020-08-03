@@ -174,7 +174,7 @@ def convert_by_latlong(file, point1, point2, p_level,
                 grb_v = grbs.select(name='V component of wind',
                                     typeOfLevel='isobaricInhPa',
                                     level=p_level[z])[0]
-                temp_v, lats, longs = grb_u.data(lat1=point1[0],
+                temp_v, lats, longs = grb_v.data(lat1=point1[0],
                                                  lat2=point2[0],
                                                  lon1=point1[1],
                                                  lon2=point2[1])
@@ -192,7 +192,7 @@ def convert_by_latlong(file, point1, point2, p_level,
                 grb_w = grbs.select(name='Vertical velocity',
                                     typeOfLevel='isobaricInhPa',
                                     level=p_level[z])[0]
-                temp_w, lats, longs = grb_u.data(lat1=point1[0],
+                temp_w, lats, longs = grb_w.data(lat1=point1[0],
                                                  lat2=point2[0],
                                                  lon1=point1[1],
                                                  lon2=point2[1])
@@ -244,7 +244,7 @@ def convert_by_latlong(file, point1, point2, p_level,
                     grb_v = grbs.select(name='V component of wind',
                                         typeOfLevel='isobaricInhPa',
                                         level=p_level[z])[t + 1]
-                    temp_v, lats, longs = grb_u.data(lat1=point1[0],
+                    temp_v, lats, longs = grb_v.data(lat1=point1[0],
                                                      lat2=point2[0],
                                                      lon1=point1[1],
                                                      lon2=point2[1])
@@ -262,7 +262,7 @@ def convert_by_latlong(file, point1, point2, p_level,
                     grb_w = grbs.select(name='Vertical velocity',
                                         typeOfLevel='isobaricInhPa',
                                         level=p_level[z])[t + 1]
-                    temp_w, lats, longs = grb_u.data(lat1=point1[0],
+                    temp_w, lats, longs = grb_w.data(lat1=point1[0],
                                                      lat2=point2[0],
                                                      lon1=point1[1],
                                                      lon2=point2[1])
