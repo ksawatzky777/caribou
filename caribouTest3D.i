@@ -45,10 +45,10 @@
 [DiracKernels]
   [./srce]
     variable = concentration
-    type = TimedPointSource
-    rate = 10.0
+    type = PieceWisePointSource
+    rates = '10.0 0.0'
+    activation_times = '0.0 1800.0'
     point = '62000.0 62000.0 0.0'
-    deactivation_time = 1800.0
   [../]
 []
 
