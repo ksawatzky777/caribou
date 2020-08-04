@@ -9,8 +9,8 @@ class SpeciesDecay;
  * Radioactive decay of the variable utilizing a decay constant provided by the
  * material system.
  */
- template <>
- InputParameters validParams<SpeciesDecay>();
+template <>
+InputParameters validParams<SpeciesDecay>();
 
 class SpeciesDecay : public Kernel
 {

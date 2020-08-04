@@ -13,7 +13,8 @@ validParams<GenericCaribouMaterial>()
   params.addRequiredParam<Real>("decay_constant", "Decay constant for this "
                                 "radionuclide.");
   params.addParam<Real>("settling_velocity", 0.0, "The z component of the "
-                        "settling velocity for this radionuclide.");
+                        "settling velocity for this radionuclide. Must be "
+                        "negative.");
   params.addParam<Real>("wet_scavenge_constant", 0.0, "The scavenging "
                         "coefficient for wet deposition.");
   return params;
@@ -25,6 +26,8 @@ GenericCaribouMaterial::GenericCaribouMaterial(const InputParameters & parameter
     _settling_v(declareProperty<RealVectorValue>("settling_velocity")),
     _wet_scavenge(declareProperty<Real>("wet_scavenge_constant"))
 {
+  if (getParam<Real>("settling_velocity") > 0.0)
+    mooseError("Settling velocity was not declared as negative.");
 }
 
 void

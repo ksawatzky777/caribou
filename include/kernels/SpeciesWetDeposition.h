@@ -3,21 +3,21 @@
 #include "Kernel.h"
 
 // Forward declaration.
-class WetDeposition;
+class SpeciesWetDeposition;
 
 /**
  * Removal of the variable from the system through wet desposition. Uses a wet
  * scavenging constant provided by the material system.
  */
- template <>
- InputParameters validParams<WetDeposition>();
+template <>
+InputParameters validParams<SpeciesWetDeposition>();
 
-class WetDeposition : public Kernel
+class SpeciesWetDeposition : public Kernel
 {
 public:
   static InputParameters validParams();
 
-  WetDeposition(const InputParameters & parameters);
+  SpeciesWetDeposition(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

@@ -17,6 +17,8 @@ InputParameters validParams<STDiffusion>();
 class STDiffusion : public Diffusion
 {
 public:
+  static InputParameters validParams();
+
   STDiffusion(const InputParameters & parameters);
 
 protected:

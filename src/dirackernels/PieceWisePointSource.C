@@ -20,6 +20,8 @@ validParams<PieceWisePointSource>()
   params.addRequiredParam<std::vector<Real>>("point", "The point in which this "
                                              "point source is located (x, y, "
                                              "z).");
+  params.addClassDescription("Piecewise point souce. Emits at specified rates "
+                             "at a series of times defined by the user.");
   return params;
 }
 
