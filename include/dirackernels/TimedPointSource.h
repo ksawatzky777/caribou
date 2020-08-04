@@ -6,8 +6,8 @@
 class TimedPointSource;
 
 /**
- * This kernel provides a point source which s activated at some time "_time_on"
- * and deactivated at some time "_time_off".
+ * This kernel provides a point source which is activated at some time _time_on
+ * and deactivated at some time _time_off.
  */
 
 template <>

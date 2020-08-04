@@ -8,7 +8,7 @@ validParams<TimedPointSource>()
 {
   InputParameters params = validParams<DiracKernel>();
   params.addRequiredParam<Real>("rate", "The rate of emission of this point "
-                                "source");
+                                "source.");
   params.addRequiredParam<std::vector<Real>>("point", "The point in which this "
                                              "point source is located (x, y, "
                                              "z).");
@@ -32,7 +32,6 @@ TimedPointSource::TimedPointSource(const InputParameters & parameters)
   if (_input_point.size() > 1)
   {
     _point(1) = _input_point[1];
-
     if (_input_point.size() > 2)
     {
       _point(2) = _input_point[2];
