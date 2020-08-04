@@ -46,9 +46,9 @@
   [./srce]
     variable = concentration
     type = TimedPointSource
-    rate = 100.0
+    rate = 10.0
     point = '62000.0 62000.0 0.0'
-    deactivation_time = 50.0
+    deactivation_time = 1800.0
   [../]
 []
 
@@ -74,7 +74,7 @@
     w_file_name = w.csv
     dim_file_name = coords.csv
     diffusivity = 1.0
-    #time_dependance = true
+    time_dependance = true
     outputs = exodus
   [../]
 []
@@ -82,8 +82,8 @@
 [Executioner]
   type = Transient
   solve_type = 'PJFNK'
-  num_steps = 100
-  dt = 1
+  num_steps = 120
+  dt = 60
 []
 
 [Outputs]

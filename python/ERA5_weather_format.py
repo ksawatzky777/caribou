@@ -274,14 +274,10 @@ def convert_by_latlong(file, point1, point2, p_level,
         print ('w completed at ' + str(times[t + 1]) +
                ' (time ' + str(t + 1) + ').')
 
-        t_df_u = pd.DataFrame(u, columns=['u' + str(t)])
-        t_df_v = pd.DataFrame(v, columns=['v' + str(t)])
-        t_df_w = pd.DataFrame(w, columns=['w' + str(t)])
-
         #Adjoining temporary dataframes to the output dataframes.
-        df_u = df_u.append(t_df_u, ignore_index=True)
-        df_v = df_v.append(t_df_v, ignore_index=True)
-        df_w = df_w.append(t_df_w, ignore_index=True)
+        df_u.insert(t + 1, "u" + str(t + 1), u)
+        df_v.insert(t + 1, "v" + str(t + 1), v)
+        df_w.insert(t + 1, "w" + str(t + 1), w)
 
     #Close GRIB file
     grbs.close()
