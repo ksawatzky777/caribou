@@ -140,6 +140,39 @@ def convert_by_latlong(file, point1, point2, p_level,
     v = np.zeros(data_size)
     w = np.zeros(data_size)
 
+    #Allocating temporary storage for the weather data.
+    temp_u = np.zeros((np.shape(grid_x)[0], np.shape(grid_y)[0],
+                      np.shape(grid_z)[0]))
+    temp_v = np.zeros((np.shape(grid_x)[0], np.shape(grid_y)[0],
+                      np.shape(grid_z)[0]))
+    temp_w = np.zeros((np.shape(grid_x)[0], np.shape(grid_y)[0],
+                      np.shape(grid_z)[0]))
+
+    #Fetching the data at each pressure level.
+    for z in range(len(p_level)):
+        grb_u = grbs.select(name='U component of wind',
+                            typeOfLevel='isobaricInhPa',
+                            level=p_level[z])[0]
+        grb_v = grbs.select(name='V component of wind',
+                            typeOfLevel='isobaricInhPa',
+                            level=p_level[z])[0]
+        grb_w = grbs.select(name='Vertical velocity',
+                            typeOfLevel='isobaricInhPa',
+                            level=p_level[z])[0]
+
+        temp_u[:, :, z], lats, longs = grb_u.data(lat1=point1[0],
+                                                  lat2=point2[0],
+                                                  lon1=point1[1],
+                                                  lon2=point2[1])
+        temp_v[:, :, z], lats, longs = grb_v.data(lat1=point1[0],
+                                                  lat2=point2[0],
+                                                  lon1=point1[1],
+                                                  lon2=point2[1])
+        temp_w[:, :, z], lats, longs = grb_w.data(lat1=point1[0],
+                                                  lat2=point2[0],
+                                                  lon1=point1[1],
+                                                  lon2=point2[1])
+
     #Counter for the master array position.
     counter = 0
 
@@ -147,20 +180,9 @@ def convert_by_latlong(file, point1, point2, p_level,
     for x in range(np.shape(longs)[0]):
         for y in range(np.shape(lats)[1]):
             for z in range(len(p_level)):
-
-                #Fetch grib message for u.
-                grb_u = grbs.select(name='U component of wind',
-                                    typeOfLevel='isobaricInhPa',
-                                    level=p_level[z])[0]
-                #Extract the data for u (lats and longs come along for the
-                #ride).
-                temp_u, lats, longs = grb_u.data(lat1=point1[0],
-                                                 lat2=point2[0],
-                                                 lon1=point1[1],
-                                                 lon2=point2[1])
                 #Collapse the data into a 1-D array as per MOOSE
                 #TrilinearInterpolation specification.
-                u[counter] = temp_u[x,y]
+                u[counter] = temp_u[x,y,z]
                 counter += 1
 
     print ('U completed at ' + str(times[0]) + ' (time 0).')
@@ -170,15 +192,7 @@ def convert_by_latlong(file, point1, point2, p_level,
     for x in range(np.shape(longs)[0]):
         for y in range(np.shape(lats)[1]):
             for z in range(len(p_level)):
-
-                grb_v = grbs.select(name='V component of wind',
-                                    typeOfLevel='isobaricInhPa',
-                                    level=p_level[z])[0]
-                temp_v, lats, longs = grb_v.data(lat1=point1[0],
-                                                 lat2=point2[0],
-                                                 lon1=point1[1],
-                                                 lon2=point2[1])
-                v[counter] = temp_v[x,y]
+                v[counter] = temp_v[x,y,z]
                 counter += 1
 
     print ('V completed at ' + str(times[0]) + ' (time 0).')
@@ -188,15 +202,7 @@ def convert_by_latlong(file, point1, point2, p_level,
     for x in range(np.shape(longs)[0]):
         for y in range(np.shape(lats)[1]):
             for z in range(len(p_level)):
-
-                grb_w = grbs.select(name='Vertical velocity',
-                                    typeOfLevel='isobaricInhPa',
-                                    level=p_level[z])[0]
-                temp_w, lats, longs = grb_w.data(lat1=point1[0],
-                                                 lat2=point2[0],
-                                                 lon1=point1[1],
-                                                 lon2=point2[1])
-                w[counter] = bu.vert_to_w(temp_w[x,y])
+                w[counter] = bu.vert_to_w(temp_w[x,y,z])
                 counter += 1
 
     print ('W completed at ' + str(times[0]) + ' (time 0).')
@@ -216,21 +222,45 @@ def convert_by_latlong(file, point1, point2, p_level,
         v = np.zeros(data_size)
         w = np.zeros(data_size)
 
+        #Allocating temporary storage for the weather data.
+        temp_u = np.zeros((np.shape(grid_x)[0], np.shape(grid_y)[0],
+                          np.shape(grid_z)[0]))
+        temp_v = np.zeros((np.shape(grid_x)[0], np.shape(grid_y)[0],
+                          np.shape(grid_z)[0]))
+        temp_w = np.zeros((np.shape(grid_x)[0], np.shape(grid_y)[0],
+                          np.shape(grid_z)[0]))
+
+        #Fetching the data at each pressure level.
+        for z in range(len(p_level)):
+            grb_u = grbs.select(name='U component of wind',
+                                typeOfLevel='isobaricInhPa',
+                                level=p_level[z])[t + 1]
+            grb_v = grbs.select(name='V component of wind',
+                                typeOfLevel='isobaricInhPa',
+                                level=p_level[z])[t + 1]
+            grb_w = grbs.select(name='Vertical velocity',
+                                typeOfLevel='isobaricInhPa',
+                                level=p_level[z])[t + 1]
+
+            temp_u[:, :, z], lats, longs = grb_u.data(lat1=point1[0],
+                                                      lat2=point2[0],
+                                                      lon1=point1[1],
+                                                      lon2=point2[1])
+            temp_v[:, :, z], lats, longs = grb_v.data(lat1=point1[0],
+                                                      lat2=point2[0],
+                                                      lon1=point1[1],
+                                                      lon2=point2[1])
+            temp_w[:, :, z], lats, longs = grb_w.data(lat1=point1[0],
+                                                      lat2=point2[0],
+                                                      lon1=point1[1],
+                                                      lon2=point2[1])
         counter = 0
 
         #Loop over the data for u.
         for x in range(np.shape(longs)[0]):
             for y in range(np.shape(lats)[1]):
                 for z in range(len(p_level)):
-                    grb_u = grbs.select(name='U component of wind',
-                                        typeOfLevel='isobaricInhPa',
-                                        level=p_level[z])[t + 1]
-                    temp_u, lats, longs = grb_u.data(lat1=point1[0],
-                                                     lat2=point2[0],
-                                                     lon1=point1[1],
-                                                     lon2=point2[1])
-
-                    u[counter] = temp_u[x,y]
+                    u[counter] = temp_u[x,y,z]
                     counter += 1
 
         print ('U completed at ' + str(times[t + 1]) +
@@ -241,15 +271,7 @@ def convert_by_latlong(file, point1, point2, p_level,
         for x in range(np.shape(longs)[0]):
             for y in range(np.shape(lats)[1]):
                 for z in range(len(p_level)):
-
-                    grb_v = grbs.select(name='V component of wind',
-                                        typeOfLevel='isobaricInhPa',
-                                        level=p_level[z])[t + 1]
-                    temp_v, lats, longs = grb_v.data(lat1=point1[0],
-                                                     lat2=point2[0],
-                                                     lon1=point1[1],
-                                                     lon2=point2[1])
-                    v[counter] = temp_v[x,y]
+                    v[counter] = temp_v[x,y,z]
                     counter += 1
 
         print ('V completed at ' + str(times[t + 1]) +
@@ -260,15 +282,7 @@ def convert_by_latlong(file, point1, point2, p_level,
         for x in range(np.shape(longs)[0]):
             for y in range(np.shape(lats)[1]):
                 for z in range(len(p_level)):
-
-                    grb_w = grbs.select(name='Vertical velocity',
-                                        typeOfLevel='isobaricInhPa',
-                                        level=p_level[z])[t + 1]
-                    temp_w, lats, longs = grb_w.data(lat1=point1[0],
-                                                     lat2=point2[0],
-                                                     lon1=point1[1],
-                                                     lon2=point2[1])
-                    w[counter] = bu.vert_to_w(temp_w[x,y])
+                    w[counter] = bu.vert_to_w(temp_w[x,y,z])
                     counter += 1
 
         print ('w completed at ' + str(times[t + 1]) +
@@ -296,4 +310,4 @@ def convert_by_latlong(file, point1, point2, p_level,
     df_w.to_csv(w_out_file, index=False)
     df_coords.to_csv(coords_out_file, index=False)
 
-    return 'Coordinate transform complete. csv files have been written.'
+    print('Coordinate transform complete. csv files have been written.')
