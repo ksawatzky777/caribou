@@ -24,5 +24,5 @@ protected:
   virtual Real computeQpJacobian() override;
 
   /// Settling velocity provided by the material system.
-  const MaterialProperty<RealVectorValue> & _settling_v;
+  const MaterialProperty<Real> & _settling_v;
 };

@@ -25,7 +25,7 @@ protected:
   MaterialProperty<Real> & _decay_const;
 
   /// Settling velocity this material is providing.
-  MaterialProperty<RealVectorValue> & _settling_v;
+  MaterialProperty<Real> & _settling_v;
 
   /// Wet scavenging coefficient this material is providing.
   MaterialProperty<Real> & _wet_scavenge;

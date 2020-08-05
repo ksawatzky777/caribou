@@ -16,18 +16,18 @@ validParams<SpeciesSettling>()
 
 SpeciesSettling::SpeciesSettling(const InputParameters & parameters)
   : Kernel(parameters),
-    _settling_v(getMaterialProperty<RealVectorValue>("settling_velocity"))
+    _settling_v(getMaterialProperty<Real>("settling_velocity"))
 {
 }
 
 Real
 SpeciesSettling::computeQpResidual()
 {
-  return _test[_i][_qp] * (_settling_v[_qp] * _grad_u[_qp]);
+  return -_u[_qp] * (_settling_v[_qp] * _grad_test[_i][_qp](2));
 }
 
 Real
 SpeciesSettling::computeQpJacobian()
 {
-  return _test[_i][_qp] * (_settling_v[_qp] * _grad_phi[_j][_qp]);
+  return -_phi[_j][_qp] * (_settling_v[_qp] * _grad_test[_i][_qp](2));
 }

@@ -23,7 +23,7 @@ validParams<GenericCaribouMaterial>()
 GenericCaribouMaterial::GenericCaribouMaterial(const InputParameters & parameters)
   : STMaterial(parameters),
     _decay_const(declareProperty<Real>("decay_constant")),
-    _settling_v(declareProperty<RealVectorValue>("settling_velocity")),
+    _settling_v(declareProperty<Real>("settling_velocity")),
     _wet_scavenge(declareProperty<Real>("wet_scavenge_constant"))
 {
   if (getParam<Real>("settling_velocity") > 0.0)
@@ -39,6 +39,6 @@ GenericCaribouMaterial::computeQpProperties()
   /// Compute properties for additional sinks and sources in the scalar transport
   /// equation.
   _decay_const[_qp] = getParam<Real>("decay_constant");
-  _settling_v[_qp] = {0.0, 0.0, getParam<Real>("settling_velocity")};
+  _settling_v[_qp] = getParam<Real>("settling_velocity");
   _wet_scavenge[_qp] = getParam<Real>("wet_scavenge_constant");
 }
