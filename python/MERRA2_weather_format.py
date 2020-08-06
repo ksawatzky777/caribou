@@ -2,8 +2,9 @@
 """
 This is adata formatting script which extracts lat-long data from MERRA-2
 netCDF files available through NASA's GMAO project and than converts the lat-
-long data to a cartesian coordinate system suitable for CARIBOU input. This
-script is defunct as the data formatting for CARIBOU has changed.
+long data to a cartesian coordinate system suitable for CARIBOU input.
+
+This script is defunct as the data formatting for CARIBOU has changed.
 """
 
 import netCDF4 as ncd
