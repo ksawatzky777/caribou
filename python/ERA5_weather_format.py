@@ -78,7 +78,7 @@ def convert_by_latlong(file, point1, point2, p_level,
 
     print ('Building coordinate system.')
     #Building cartesian coordinate system from the latitudes, longitudes and
-    #pressure levels.
+    #pressure levels. This is janky, but it works.
     grid_x = np.zeros(np.shape(longs)[0])
     grid_y = np.zeros(np.shape(lats)[1])
     grid_z = np.zeros(len(p_level))
@@ -176,36 +176,19 @@ def convert_by_latlong(file, point1, point2, p_level,
     #Counter for the master array position.
     counter = 0
 
-    #Loop over the data for u.
+    #Loop over the data.
     for x in range(np.shape(longs)[0]):
         for y in range(np.shape(lats)[1]):
             for z in range(len(p_level)):
                 #Collapse the data into a 1-D array as per MOOSE
                 #TrilinearInterpolation specification.
                 u[counter] = temp_u[x,y,z]
-                counter += 1
-
-    print ('U completed at ' + str(times[0]) + ' (time 0).')
-    counter = 0
-
-    #Loop over the data for v. Same process as u.
-    for x in range(np.shape(longs)[0]):
-        for y in range(np.shape(lats)[1]):
-            for z in range(len(p_level)):
                 v[counter] = temp_v[x,y,z]
-                counter += 1
-
-    print ('V completed at ' + str(times[0]) + ' (time 0).')
-    counter = 0
-
-    #Loop over the data for w. Same process as u.
-    for x in range(np.shape(longs)[0]):
-        for y in range(np.shape(lats)[1]):
-            for z in range(len(p_level)):
                 w[counter] = bu.vert_to_w(temp_w[x,y,z])
                 counter += 1
 
-    print ('W completed at ' + str(times[0]) + ' (time 0).')
+    print ('Formatting completed at ' + str(times[0]) + ' (time 0).')
+    counter = 0
 
     #Building pandas dataframes for each component of the velocity.
     df_u = pd.DataFrame(u, columns=['u0'])
@@ -256,37 +239,18 @@ def convert_by_latlong(file, point1, point2, p_level,
                                                       lon2=point2[1])
         counter = 0
 
-        #Loop over the data for u.
+        #Loop over the data.
         for x in range(np.shape(longs)[0]):
             for y in range(np.shape(lats)[1]):
                 for z in range(len(p_level)):
                     u[counter] = temp_u[x,y,z]
-                    counter += 1
-
-        print ('U completed at ' + str(times[t + 1]) +
-               ' (time ' + str(t + 1) + ').')
-        counter = 0
-
-        #Loop over the data for v.
-        for x in range(np.shape(longs)[0]):
-            for y in range(np.shape(lats)[1]):
-                for z in range(len(p_level)):
                     v[counter] = temp_v[x,y,z]
-                    counter += 1
-
-        print ('V completed at ' + str(times[t + 1]) +
-               ' (time ' + str(t + 1) + ').')
-        counter = 0
-
-        #Loop over the data for w.
-        for x in range(np.shape(longs)[0]):
-            for y in range(np.shape(lats)[1]):
-                for z in range(len(p_level)):
                     w[counter] = bu.vert_to_w(temp_w[x,y,z])
                     counter += 1
 
-        print ('w completed at ' + str(times[t + 1]) +
+        print ('Formatting completed at ' + str(times[t + 1]) +
                ' (time ' + str(t + 1) + ').')
+        counter = 0
 
         #Adjoining temporary dataframes to the output dataframes.
         df_u.insert(t + 1, "u" + str(t + 1), u)
