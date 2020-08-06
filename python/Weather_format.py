@@ -2,7 +2,10 @@
 """
 This is a data formatting script which extracts long-lat data from ERA5 GRIB1
 and GRIB2 files available in the climate data store and than convert the lat-
-long data to a cartesian coordinate system suitable for CARIBOU input.
+long data to a cartesian coordinate system suitable for CARIBOU input. It
+assumes the data is held on constant pressure levels and the variables stored
+follow the naming convention specified in the ERA5 data documentation. Variable
+names will need to be changed if a different dataset is utilized.
 """
 import pygrib
 import numpy as np
