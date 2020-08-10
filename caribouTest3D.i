@@ -47,7 +47,7 @@
     variable = concentration
     type = PieceWisePointSource
     rates = '10.0 0.0'
-    activation_times = '0.0 1800.0'
+    activation_times = '0.0 3600.0'
     point = '62000.0 62000.0 0.0'
   [../]
 []
@@ -82,7 +82,7 @@
 [Executioner]
   type = Transient
   solve_type = 'PJFNK'
-  num_steps = 120
+  num_steps = 480
   dt = 60
 []
 
