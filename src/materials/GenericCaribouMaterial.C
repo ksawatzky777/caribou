@@ -22,7 +22,7 @@ validParams<GenericCaribouMaterial>()
 
 GenericCaribouMaterial::GenericCaribouMaterial(const InputParameters & parameters)
   : STMaterial(parameters),
-    _decay_const(declareProperty<Real>("decay_constant")),
+    _decay_const(declareProperty<Real>("decay_const")),
     _settling_v(declareProperty<Real>("settling_velocity")),
     _wet_scavenge(declareProperty<Real>("wet_scavenge_constant"))
 {

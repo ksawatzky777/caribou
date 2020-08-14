@@ -1,9 +1,9 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx = 100
-  ny = 100
-  nz = 100
+  nx = 50
+  ny = 50
+  nz = 50
   xmin = 0.0
   xmax = 465000.0
   ymin = 0.0
@@ -54,7 +54,7 @@
 
 [DiracKernels]
   [./srce]
-    variable = cs
+    variable = cs137
     type = PieceWisePointSource
     rates = '1.1e11'
     activation_times = '0.0'
@@ -65,19 +65,19 @@
 [BCs]
   [./open]
     type = MaterialOutflowBC
-    variable = concentration
+    variable = cs137
     boundary = '0 2 3 4 5'
   [../]
   [./bott]
     type = DryDepositionBC
-    variable = concentration
+    variable = cs137
     boundary = '1'
     dry_deposition_velocity = 0.001
   [../]
 []
 
 [Materials]
-  [./cs137]
+  [./plume]
     type = GenericCaribouMaterial
     u_file_name = u.csv
     v_file_name = v.csv
@@ -85,7 +85,7 @@
     dim_file_name = coords.csv
     diffusivity = 1.0
     decay_constant = 7.285e-10
-    settling_velocity = 0.002
+    settling_velocity = -0.002
   [../]
 [../]
 
