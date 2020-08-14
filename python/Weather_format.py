@@ -199,7 +199,7 @@ def convert_by_latlong(file, point1, point2, p_level,
     df_w = pd.DataFrame(w, columns=['w0'])
 
     #Loop over each time index other than the first.
-    for t in range(len(times) - 1):
+    for t in range(len(times) - 2):
         print ('Extracting data at ' + str(times[t + 1]) +
                ' (time ' + str(t + 1) + ').')
 
