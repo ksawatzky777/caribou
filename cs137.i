@@ -1,19 +1,19 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx = 50
-  ny = 50
-  nz = 50
+  nx = 100
+  ny = 100
+  nz = 100
   xmin = 0.0
-  xmax = 124000.0
+  xmax = 465000.0
   ymin = 0.0
-  ymax = 124000.0
+  ymax = 465000.0
   zmin = 0.0
-  zmax = 11539.0
+  zmax = 11322.0
 []
 
 [Variables]
-  [./cs]
+  [./cs137]
     order = FIRST
     family = LAGRANGE
 
@@ -27,28 +27,28 @@
 [Kernels]
   [./diff]
     type = STDiffusion
-    variable = cs
+    variable = cs137
   [../]
 
   [./advc]
     type = STAdvection
-    variable = cs
+    variable = cs137
     upwinding_type = full
   [../]
 
   [./time]
     type = STTimeDerivative
-    variable = cs
+    variable = cs137
   [../]
 
   [./decay]
     type = SpeciesDecay
-    variable = cs
+    variable = cs137
   [../]
 
   [./settling]
     type = SpeciesSettling
-    variable = cs
+    variable = cs137
   [../]
 []
 
@@ -58,7 +58,7 @@
     type = PieceWisePointSource
     rates = '1.1e11'
     activation_times = '0.0'
-    point = '62000.0 62000.0 0.0'
+    point = '232500.0 232500.0 0.0'
   [../]
 []
 
@@ -72,7 +72,7 @@
     type = DryDepositionBC
     variable = concentration
     boundary = '1'
-    dry_deposition_velocity = 0.1
+    dry_deposition_velocity = 0.001
   [../]
 []
 
@@ -85,14 +85,14 @@
     dim_file_name = coords.csv
     diffusivity = 1.0
     decay_constant = 7.285e-10
-    settling_velocity = 0.2
+    settling_velocity = 0.002
   [../]
 [../]
 
 [Executioner]
   type = Transient
   solve_type = 'PJFNK'
-  num_steps = 480
+  num_steps = 10
   dt = 60
 []
 
