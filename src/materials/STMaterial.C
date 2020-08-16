@@ -146,7 +146,6 @@ STMaterial::twoDConstruct(std::string & _delimiter,
                           std::vector<std::string> & _file_names)
 {
   std::vector<MooseUtils::DelimitedFileReader> _reader;
-  std::vector<std::vector<std::string>> _data_names;
 
   for (unsigned i = 0; i < _file_names.size(); i++)
   {
@@ -185,7 +184,7 @@ STMaterial::twoDConstruct(std::string & _delimiter,
   cleanAxisData(_dimensions[1]);
 
   /// Read weather data from files.
-  for (unsigned i = 0; i < _dimensions[3].size(); i++)
+  for (unsigned i = 0; i < _dimensions[3].size() - 1; i++)
   {
     _u_data.push_back(_reader[0].getData(_data_names[0][i]));
     _v_data.push_back(_reader[1].getData(_data_names[1][i]));
@@ -207,7 +206,6 @@ STMaterial::threeDConstruct(std::string & _delimiter,
                             std::vector<std::string> & _file_names)
 {
   std::vector<MooseUtils::DelimitedFileReader> _reader;
-  std::vector<std::vector<std::string>> _data_names;
 
   for (unsigned i = 0; i < _file_names.size(); i++)
   {
@@ -246,7 +244,7 @@ STMaterial::threeDConstruct(std::string & _delimiter,
   cleanAxisData(_dimensions[2]);
 
   /// Read weather data from files.
-  for (unsigned i = 0; i < _dimensions[3].size(); i++)
+  for (unsigned i = 0; i < _dimensions[3].size() - 1; i++)
   {
     _u_data.push_back(_reader[0].getData(_data_names[0][i]));
     _v_data.push_back(_reader[1].getData(_data_names[1][i]));

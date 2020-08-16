@@ -59,6 +59,9 @@ protected:
   /// Vectors of values for the data axis.
   std::vector<std::vector<Real>> _dimensions;
 
+  /// Vectors of values for the data names.
+  std::vector<std::vector<std::string>> _data_names;
+
   ///Vectors of values for the data.
   std::vector<std::vector<Real>> _u_data;
   std::vector<std::vector<Real>> _v_data;
