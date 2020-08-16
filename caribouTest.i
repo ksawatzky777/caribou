@@ -61,11 +61,6 @@
 [Materials]
   [./test]
     type = STMaterial
-    num_dims = 2
-    u_file_name = u.csv
-    v_file_name = v.csv
-    w_file_name = w.csv
-    dim_file_name = coords.csv
     diffusivity = 1.0
     const_velocity = '-10.0 0.0 0.0'
   [../]
