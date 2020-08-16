@@ -51,7 +51,7 @@
 
 [BCs]
   [./left]
-    type = OutflowBC
+    type = ConstantOutflowBC
     variable = concentration
     boundary = '3'
     velocity = '-10.0 0.0 0.0'
@@ -69,7 +69,7 @@
 [Executioner]
   type = Transient
   solve_type = 'PJFNK'
-  num_steps = 100
+  num_steps = 10
   dt = 1
 []
 
