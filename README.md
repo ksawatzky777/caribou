@@ -35,8 +35,7 @@ To ensure Caribou has been built properly, execute the 2D test input using the
 following commands:
 
 ```bash
-cd tests
-./caribou-opt -i caribouTest2D.i
+./caribou-opt -i caribouTest.i
 ```
 
 ## Acknowledgements
