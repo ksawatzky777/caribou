@@ -22,7 +22,7 @@ for installation of MOOSE can be found
 [here](https://www.mooseframework.org/getting_started/index.html). After the
 MOOSE framework has been installed, Caribou can be installed by running the
 following series of commands in the same directory that holds your MOOSE
-installation (if the tutorial above was followed, it might be `~projects`):
+installation (if the tutorial above was followed, `~projects`):
 
 ```bash
 git clone https://github.com/ksawatzky777/caribou.git
