@@ -11,7 +11,7 @@ framework see:
 
 ## Use
 
-Caribou currently consists of an atmospheric aerosol transport model.
+Caribou currently consists of an atmospheric eulerian transport model.
 Additional capabilities are planned for the future. Documentation of the
 airborne transport kernels, boundary conditions and materials will become
 available at a later date.
