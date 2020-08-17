@@ -37,6 +37,9 @@ following commands:
 ./caribou-opt -i caribouTest.i
 ```
 
+The python scripts provided for the purpose of weather data formatting require 
+the installation of pygrib. Pygrib, and its series of dependancies can be 
+found [here](https://jswhit.github.io/pygrib/docs/).
 ## Acknowledgements
 
 We acknowledge the support of the Natural Sciences and Engineering Research
