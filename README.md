@@ -13,9 +13,8 @@ framework see:
 
 Caribou currently consists of an atmospheric eulerian transport model.
 Additional capabilities are planned for the future. Documentation of the
-airborne transport kernels, boundary conditions and materials will become
-available at a later date.
-
+airborne transport kernels, boundary conditions and materials can be found 
+[here](https://github.com/ksawatzky777/caribou/wiki).
 ## Installation
 
 Caribou requires the installation of the MOOSE framework. Detailed instructions
