@@ -19,11 +19,25 @@ MaterialOutflowBC::MaterialOutflowBC(const InputParameters & parameters)
 Real
 MaterialOutflowBC::computeQpResidual()
 {
-  return _test[_i][_qp] * _u[_qp] * _velocity[_qp] * _normals[_qp];
+  if (_velocity[_qp] * _normals[_qp] > 0)
+  {
+    return _test[_i][_qp] * _u[_qp] * _velocity[_qp] * _normals[_qp];
+  }
+  else
+  {
+    return 0.0;
+  }
 }
 
 Real
 MaterialOutflowBC::computeQpJacobian()
 {
-  return _test[_i][_qp] * _phi[_j][_qp] * _velocity[_qp] * _normals[_qp];
+  if (_velocity[_qp] * _normals[_qp] > 0)
+  {
+    return _test[_i][_qp] * _phi[_j][_qp] * _velocity[_qp] * _normals[_qp];
+  }
+  else
+  {
+    return 0.0;
+  }
 }
