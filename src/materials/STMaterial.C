@@ -184,7 +184,7 @@ STMaterial::twoDConstruct(std::string & _delimiter,
   cleanAxisData(_dimensions[1]);
 
   /// Read weather data from files.
-  for (unsigned i = 0; i < _dimensions[3].size() - 1; i++)
+  for (unsigned i = 0; i < _dimensions[3].size(); i++)
   {
     _u_data.push_back(_reader[0].getData(_data_names[0][i]));
     _v_data.push_back(_reader[1].getData(_data_names[1][i]));
@@ -244,7 +244,7 @@ STMaterial::threeDConstruct(std::string & _delimiter,
   cleanAxisData(_dimensions[2]);
 
   /// Read weather data from files.
-  for (unsigned i = 0; i < _dimensions[3].size() - 1; i++)
+  for (unsigned i = 0; i < _dimensions[3].size(); i++)
   {
     _u_data.push_back(_reader[0].getData(_data_names[0][i]));
     _v_data.push_back(_reader[1].getData(_data_names[1][i]));
