@@ -47,4 +47,4 @@ Council of Canada (NSERC).
 
 Cette recherche a été financée par le Conseil de recherches en sciences naturelles et en génie du Canada (CRSNG).
 
-![NSERC Logo](https://github.com/ksawatzky777/caribou/blob/master/logos/img-logo2-en.png)
+![NSERC Logo](https://www.nserc-crsng.gc.ca/img/logos/img-logo2-en.png)
