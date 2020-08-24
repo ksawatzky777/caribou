@@ -4,10 +4,10 @@
   nx = 50
   ny = 50
   nz = 50
-  xmin = 0.0
-  xmax = 465000.0
-  ymin = 0.0
-  ymax = 465000.0
+  xmin = 222500.0
+  xmax = 242500.0
+  ymin = 222500.0
+  ymax = 242500.0
   zmin = 0.0
   zmax = 11322.0
 []
@@ -16,6 +16,7 @@
   [./cs137]
     order = FIRST
     family = LAGRANGE
+    scaling = '1.0e-11'
 
     [./InitialCondition]
       type = ConstantIC
@@ -83,6 +84,7 @@
     v_file_name = v.csv
     w_file_name = w.csv
     dim_file_name = coords.csv
+    time_dependance = true
     diffusivity = 1.0
     decay_constant = 7.285e-10
     settling_velocity = -0.002
