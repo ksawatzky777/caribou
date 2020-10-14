@@ -13,7 +13,7 @@ framework see:
 
 Caribou currently consists of an atmospheric eulerian transport model.
 Additional capabilities are planned for the future. Documentation of the
-airborne transport kernels, boundary conditions and materials can be found 
+airborne transport kernels, boundary conditions and materials can be found
 [here](https://github.com/ksawatzky777/caribou/wiki).
 ## Installation
 
@@ -34,11 +34,11 @@ To ensure Caribou has been built properly, execute the 2D test input using the
 following commands:
 
 ```bash
-./caribou-opt -i caribouTest.i
+./run_tests -j4
 ```
 
-The python scripts provided for the purpose of weather data formatting require 
-the installation of pygrib. Pygrib, and its series of dependancies can be 
+The python scripts provided for the purpose of weather data formatting require
+the installation of pygrib. Pygrib, and its series of dependancies can be
 found [here](https://jswhit.github.io/pygrib/docs/).
 ## Acknowledgements
 

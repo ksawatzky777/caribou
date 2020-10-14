@@ -1,0 +1,7 @@
+[Tests]
+  [./scalar_transport]
+    type = 'Exodiff'
+    input = 'caribouTest.i'
+    exodiff = 'caribouTest_out.e'
+  [../]
+[]
