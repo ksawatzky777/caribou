@@ -88,7 +88,7 @@ protected:
   Real _old_time;
 
   /// Diffusion coefficient which this material is providing.
-  MaterialProperty<Real> & _diffusivity;
+  MaterialProperty<std::vector<Real>> & _diffusivity;
 
   /// Velocity profile which this material is supplying.
   MaterialProperty<RealVectorValue> & _velocity;

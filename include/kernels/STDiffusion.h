@@ -26,5 +26,5 @@ protected:
   virtual Real computeQpJacobian() override;
 
   /// Diffusion coefficient provided by the material system.
-  const MaterialProperty<Real> & _diffusivity;
+  const MaterialProperty<std::vector<Real>> & _diffusivity;
 };

@@ -1,7 +1,12 @@
 [Tests]
   [./scalar_transport]
     type = 'Exodiff'
-    input = 'caribouTest.i'
-    exodiff = 'caribouTest_out.e'
+    input = '2d_transport.i'
+    exodiff = '2d_transport_out.e'
+  [../]
+  [./directional_diffusion]
+    type = 'Exodiff'
+    input = 'test_directional_diffusion.i'
+    exodiff = 'test_directional_diffusion_out.e'
   [../]
 []

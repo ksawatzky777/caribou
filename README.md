@@ -30,7 +30,7 @@ cd caribou
 make -j4
 ```
 
-To ensure Caribou has been built properly, execute the 2D test input using the
+To ensure Caribou has been built properly, execute the tests using the
 following commands:
 
 ```bash

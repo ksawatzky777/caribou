@@ -13,9 +13,10 @@ validParams<STMaterial>()
   params.addClassDescription("Generic scalar transport material which provides "
                              "the variables required to implement advection-"
                              "diffusion.");
-  params.addRequiredParam<Real>("diffusivity", "Value of the diffusion "
-                                "coefficient, assumed constant across the "
-                                "whole domain.");
+  params.addRequiredParam<std::vector<Real>>("diffusivity", "Value of the "
+                                "diffusion coefficient. Can declare either a "
+                                "single value or a vector of up to 3 values "
+                                "(one for each spatial dimension)");
   params.addParam<RealVectorValue>("const_velocity", "Velocity vector for "
                                    "advection, overrides the velocity provided "
                                    "by the datafiles.");
@@ -41,7 +42,7 @@ validParams<STMaterial>()
 
 STMaterial::STMaterial(const InputParameters & parameters)
   : Material(parameters),
-    _diffusivity(declareProperty<Real>("diffusivity")),
+    _diffusivity(declareProperty<std::vector<Real>>("diffusivity")),
     _velocity(declareProperty<RealVectorValue>("material_velocity")),
     _num_dims(_mesh.dimension()),
     _velocity_time_dependant(getParam<bool>("time_dependance"))
@@ -49,6 +50,13 @@ STMaterial::STMaterial(const InputParameters & parameters)
   _const_v = parameters.isParamSetByUser("const_velocity");
   std::string _delimiter = getParam<std::string>("delimiter");
   std::vector<std::string> _file_names;
+
+  if (getParam<std::vector<Real>>("diffusivity").size() != _num_dims
+      && getParam<std::vector<Real>>("diffusivity").size() > 1)
+  {
+    mooseError("Must declare values of the diffusion coefficient in all "
+               "mesh directions, or a single value.");
+  }
 
   /// Initialize the time index to 0 and old time to the initial sim time.
   _t_index = 0;
@@ -324,7 +332,7 @@ STMaterial::twoDComputeQpProperties()
   }
 
   /// Compute properties.
-  _diffusivity[_qp] = getParam<Real>("diffusivity");
+  _diffusivity[_qp] = getParam<std::vector<Real>>("diffusivity");;
 
   _velocity[_qp] = {_2_d_interp[0].sample(_q_point[_qp](0), _q_point[_qp](1),
                     0.0), _2_d_interp[1].sample(_q_point[_qp](0),
@@ -349,7 +357,7 @@ STMaterial::threeDComputeQpProperties()
   }
 
   /// Compute properties.
-  _diffusivity[_qp] = getParam<Real>("diffusivity");
+  _diffusivity[_qp] = getParam<std::vector<Real>>("diffusivity");;
 
   _velocity[_qp] = {_3_d_interp[0].sample(_q_point[_qp](0), _q_point[_qp](1),
                     _q_point[_qp](2)),
@@ -372,7 +380,7 @@ STMaterial::computeQpProperties()
   }
   else
   {
-    _diffusivity[_qp] = getParam<Real>("diffusivity");
+    _diffusivity[_qp] = getParam<std::vector<Real>>("diffusivity");
     _velocity[_qp] = getParam<RealVectorValue>("const_velocity");
   }
 }
